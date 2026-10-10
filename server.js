@@ -127,6 +127,73 @@ function setSession(res, key) {
   persist();
   return `${COOKIE}=${tok}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${SESSION_MS / 1000}${COOKIE_SECURE ? "; Secure" : ""}`;
 }
+
+/* ---- Family helpers (child accounts that belong to an adult) ---- */
+const DEF_REW = () => [{ id: "r1", k: "rw1", c: 150 }, { id: "r2", k: "rw2", c: 100 }, { id: "r3", k: "rw3", c: 250 }];
+const isFam = (u) => !!u && u.role === "child" && typeof u.parent === "string" && has(db.users, u.parent);
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const asDate = (v) => (typeof v === "string" && DATE_RE.test(v) ? v : null);
+const asArr = (v) => (Array.isArray(v) ? v : []);
+function enforceChild(u, st) {
+  const old = u.state && typeof u.state === "object" ? u.state : {};
+  st.pin = "";
+  st.rewards = Array.isArray(old.rewards) ? old.rewards : DEF_REW();
+  const asg = asArr(u.assigned);
+  const grantKeys = new Set(asArr(u.grants).filter((g) => g.type === "ok").map((g) => g.id + "|" + g.d));
+  const given = asArr(st.items).filter((i) => i && typeof i === "object");
+  const cur = new Map(given.filter((i) => typeof i.id === "string").map((i) => [i.id, i]));
+  const prev = new Map(asArr(old.items).filter((i) => i && typeof i.id === "string").map((i) => [i.id, i]));
+  const mine = given.filter((i) => !has(i, "by")).slice(0, 500);
+  mine.forEach((i) => { i.ap = false; });
+  const out = asg.map((a) => {
+    const c = cur.get(a.id) || {}, p = prev.get(a.id) || {};
+    const it = Object.assign({}, a);
+    let pendOn = asDate(c.pendOn), doneOn = asDate(c.doneOn);
+    if (a.rec === "once" && a.ap) {
+      if (p.doneOn) doneOn = asDate(p.doneOn);
+      else if (doneOn && !grantKeys.has(a.id + "|" + doneOn)) doneOn = null;
+    }
+    if (pendOn) it.pendOn = pendOn;
+    if (doneOn) it.doneOn = doneOn;
+    return it;
+  });
+  st.items = mine.concat(out);
+  const apRec = asg.filter((a) => a.ap && a.rec !== "once");
+  if (apRec.length) {
+    if (!st.done || typeof st.done !== "object" || Array.isArray(st.done)) st.done = {};
+    const od = old.done && typeof old.done === "object" ? old.done : {};
+    for (const a of apRec) {
+      for (const d of Object.keys(st.done)) {
+        if (d === "__proto__" || !Array.isArray(st.done[d])) continue;
+        const was = has(od, d) && Array.isArray(od[d]) && od[d].includes(a.id);
+        if (st.done[d].includes(a.id) && !was && !grantKeys.has(a.id + "|" + d)) st.done[d] = st.done[d].filter((x) => x !== a.id);
+      }
+      for (const d of Object.keys(od)) {
+        if (d === "__proto__" || !Array.isArray(od[d]) || !od[d].includes(a.id)) continue;
+        if (!Array.isArray(st.done[d])) st.done[d] = [];
+        if (!st.done[d].includes(a.id)) st.done[d].push(a.id);
+      }
+    }
+  }
+}
+function pendingOf(u) {
+  const st = u.state || {}, out = [];
+  const grants = new Set(asArr(u.grants).map((g) => g.id + "|" + g.d));
+  for (const a of asArr(u.assigned)) {
+    if (!a.ap) continue;
+    if (a.rec === "once") {
+      const it = asArr(st.items).find((i) => i && i.id === a.id);
+      if (it && it.pendOn && !it.doneOn && !grants.has(a.id + "|" + it.pendOn)) out.push({ id: a.id, t: a.t, d: it.pendOn, xp: a.xp });
+    } else if (st.pend && typeof st.pend === "object") {
+      for (const d of Object.keys(st.pend)) {
+        if (d === "__proto__" || !Array.isArray(st.pend[d]) || !st.pend[d].includes(a.id)) continue;
+        if (!grants.has(a.id + "|" + d)) out.push({ id: a.id, t: a.t, d, xp: a.xp });
+      }
+    }
+  }
+  return out.sort((x, y) => x.d.localeCompare(y.d)).slice(0, 100);
+}
+
 function deleteUser(key) {
   const kids = Object.keys(db.users).filter((k) => db.users[k].parent === key);
   [key].concat(kids).forEach((k) => {
@@ -226,7 +293,10 @@ const server = http.createServer(async (req, res) => {
     if (p === "/api/me" && req.method === "GET") {
       const s = sessionUser(req);
       if (!s) return sendJson(res, 200, { user: null });
-      return sendJson(res, 200, { user: s.user.name, role: s.user.role || "adult", admin: !!s.user.isAdmin, mustChange: !!s.user.mustChange, state: s.user.state || {} });
+      const fam = isFam(s.user);
+      const stOut = s.user.state || {};
+      if (fam) { stOut.pin = ""; if (!Array.isArray(stOut.rewards)) stOut.rewards = DEF_REW(); }
+      return sendJson(res, 200, { user: s.user.name, role: s.user.role || "adult", admin: !!s.user.isAdmin, mustChange: !!s.user.mustChange, family: fam, grants: fam ? asArr(s.user.grants) : [], state: stOut });
     }
 
     if (p === "/api/register" && req.method === "POST") {
@@ -265,7 +335,7 @@ const server = http.createServer(async (req, res) => {
       if (!u || good.length !== got.length || !crypto.timingSafeEqual(got, good)) return sendJson(res, 401, { error: "bad" });
       hits.delete("u:" + key);
       const cookie = setSession(res, key);
-      return sendJson(res, 200, { user: u.name, role: u.role || "adult", admin: !!u.isAdmin, mustChange: !!u.mustChange, state: u.state || {} }, { "Set-Cookie": cookie });
+      return sendJson(res, 200, { user: u.name, role: u.role || "adult", admin: !!u.isAdmin, mustChange: !!u.mustChange, family: isFam(u), grants: isFam(u) ? asArr(u.grants) : [], state: u.state || {} }, { "Set-Cookie": cookie });
     }
 
     if (p === "/api/logout" && req.method === "POST") {
@@ -281,7 +351,18 @@ const server = http.createServer(async (req, res) => {
       if (limited("put:" + s.key, 300, 60 * 1000)) return sendJson(res, 429, { error: "rate" });
       const b = await readBody(req);
       if (!b || typeof b !== "object" || Array.isArray(b)) return sendJson(res, 400, { error: "state" });
+      if (isFam(s.user)) enforceChild(s.user, b);
       s.user.state = b;
+      persist();
+      return sendJson(res, 200, { ok: true });
+    }
+
+    if (p === "/api/ack" && req.method === "POST") {
+      const s = sessionUser(req);
+      if (!s) return sendJson(res, 401, { error: "auth" });
+      const b = await readBody(req);
+      const ids = new Set(asArr(b.ids).map(String));
+      s.user.grants = asArr(s.user.grants).filter((g) => !ids.has(g.n));
       persist();
       return sendJson(res, 200, { ok: true });
     }
@@ -314,7 +395,85 @@ const server = http.createServer(async (req, res) => {
       if ((s.user.role || "adult") !== "adult") return sendJson(res, 403, { error: "role" });
       const kids = () => Object.keys(db.users).filter((k) => db.users[k].parent === s.key);
       if (p === "/api/family" && req.method === "GET") {
-        return sendJson(res, 200, { children: kids().map((k) => { const u = db.users[k]; return { name: u.name, created: u.created, xp: Number((u.state || {}).xp) || 0 }; }) });
+        return sendJson(res, 200, { children: kids().map((k) => {
+          const u = db.users[k], st = u.state || {};
+          return {
+            name: u.name, created: u.created, xp: Number(st.xp) || 0,
+            pending: pendingOf(u),
+            tasks: asArr(u.assigned).map((a) => ({ id: a.id, t: a.t, kind: a.kind, rec: a.rec, date: a.date, time: a.time, xp: a.xp, ap: !!a.ap })),
+            rewards: (Array.isArray(st.rewards) ? st.rewards : DEF_REW()).map((r) => ({ id: r.id, k: r.k || "", n: r.n || "", c: r.c }))
+          };
+        }) });
+      }
+      const kidOf = (name) => { const key = String(name || "").trim().toLowerCase(); return has(db.users, key) && db.users[key].parent === s.key ? db.users[key] : null; };
+      if (p === "/api/family/task" && req.method === "POST") {
+        if (limited("ftask:" + s.key, 120, 60 * 60 * 1000)) return sendJson(res, 429, { error: "rate" });
+        const b = await readBody(req);
+        const u = kidOf(b.username);
+        if (!u) return sendJson(res, 404, { error: "unknown" });
+        const title = String(b.title || "").trim().slice(0, 80);
+        if (!title) return sendJson(res, 400, { error: "title" });
+        const kind = b.kind === "event" ? "event" : "task";
+        const rec = ["once", "daily", "weekly", "monthly"].includes(b.rec) ? b.rec : "once";
+        const date = asDate(b.date);
+        if (!date) return sendJson(res, 400, { error: "date" });
+        let days = asArr(b.days).map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n <= 6);
+        days = [...new Set(days)].sort();
+        const time = /^([01]\d|2[0-3]):[0-5]\d$/.test(String(b.time || "")) ? String(b.time) : "";
+        const xp = kind === "event" ? 10 : ({ easy: 10, mid: 20, boss: 40 })[b.size] || 20;
+        if (asArr(u.assigned).length >= 200) return sendJson(res, 400, { error: "limit" });
+        const dom = Number(date.slice(8, 10));
+        const dow = new Date(date + "T12:00:00Z").getUTCDay();
+        const it = { id: "a" + crypto.randomBytes(6).toString("hex"), t: title, kind, rec, date, days: rec === "weekly" ? (days.length ? days : [dow]) : [], dom, time, xp, ap: !!b.ap, by: s.user.name };
+        u.assigned = asArr(u.assigned).concat([it]);
+        u.state = u.state && typeof u.state === "object" ? u.state : {};
+        u.state.items = asArr(u.state.items).concat([Object.assign({}, it)]);
+        persist();
+        return sendJson(res, 200, { ok: true });
+      }
+      if (p === "/api/family/taskdel" && req.method === "POST") {
+        const b = await readBody(req);
+        const u = kidOf(b.username);
+        if (!u) return sendJson(res, 404, { error: "unknown" });
+        const id = String(b.id || "");
+        u.assigned = asArr(u.assigned).filter((a) => a.id !== id);
+        if (u.state) u.state.items = asArr(u.state.items).filter((i) => !(i && i.id === id));
+        u.grants = asArr(u.grants).filter((g) => g.id !== id);
+        persist();
+        return sendJson(res, 200, { ok: true });
+      }
+      if ((p === "/api/family/confirm" || p === "/api/family/reject") && req.method === "POST") {
+        const b = await readBody(req);
+        const u = kidOf(b.username);
+        if (!u) return sendJson(res, 404, { error: "unknown" });
+        const id = String(b.id || ""), d = asDate(b.d);
+        if (!d || !pendingOf(u).some((x) => x.id === id && x.d === d)) return sendJson(res, 404, { error: "unknown" });
+        if (asArr(u.grants).length >= 200) return sendJson(res, 400, { error: "limit" });
+        u.grants = asArr(u.grants).concat([{ n: crypto.randomBytes(6).toString("hex"), type: p.endsWith("confirm") ? "ok" : "no", id, d }]);
+        persist();
+        return sendJson(res, 200, { ok: true });
+      }
+      if (p === "/api/family/reward" && req.method === "POST") {
+        const b = await readBody(req);
+        const u = kidOf(b.username);
+        if (!u) return sendJson(res, 404, { error: "unknown" });
+        const n = String(b.name || "").trim().slice(0, 40), c = Math.floor(Number(b.cost));
+        if (!n || !(c > 0) || c > 100000) return sendJson(res, 400, { error: "reward" });
+        u.state = u.state && typeof u.state === "object" ? u.state : {};
+        if (!Array.isArray(u.state.rewards)) u.state.rewards = DEF_REW();
+        if (u.state.rewards.length >= 50) return sendJson(res, 400, { error: "limit" });
+        u.state.rewards.push({ id: "r" + crypto.randomBytes(5).toString("hex"), n, c });
+        persist();
+        return sendJson(res, 200, { ok: true });
+      }
+      if (p === "/api/family/rewarddel" && req.method === "POST") {
+        const b = await readBody(req);
+        const u = kidOf(b.username);
+        if (!u) return sendJson(res, 404, { error: "unknown" });
+        u.state = u.state && typeof u.state === "object" ? u.state : {};
+        u.state.rewards = (Array.isArray(u.state.rewards) ? u.state.rewards : DEF_REW()).filter((r) => r.id !== String(b.id || ""));
+        persist();
+        return sendJson(res, 200, { ok: true });
       }
       if (p === "/api/family/child" && req.method === "POST") {
         if (limited("fam:" + s.key, 20, 60 * 60 * 1000)) return sendJson(res, 429, { error: "rate" });

@@ -1,9 +1,10 @@
 # QuestBoss
 
-A game-style daily planner for kids and teens : quests, XP, levels, coins, streaks, badges, skins and parent-approved rewards. Accounts are real (server-side storage), with child and adult account types and a Family area.
+A game-style daily planner for kids and teens: quests, XP, levels, coins, streaks, badges, skins and parent-approved rewards. Accounts are real (server-side storage), with child and adult account types and a Family area.
 
 - Zero dependencies, Node.js >= 18
 - Data in `data/db.json` (atomic writes), passwords hashed with scrypt, HttpOnly session cookie
+- Family: adults create child accounts, assign tasks to them (optionally with parent approval), confirm completed tasks and manage the children's rewards. Child accounts that belong to a family have no PIN; self-registered child accounts keep the PIN
 - App languages: English (default), German, French, Italian, Spanish, Polish (switch via the gear menu)
 
 ## Install on Pterodactyl
@@ -48,3 +49,7 @@ The GitHub Action builds `questboss.tar.gz` plus its `.sha256` and publishes a r
 ## Note
 
 The in-app "small reward" link (`PP` constant in `public/index.html`) points to the original developer. Set it to your own link, or to an empty string to hide the section.
+
+## Credits
+
+Created by Matteo Mit Zwei T and M4rcu5, with Claude.

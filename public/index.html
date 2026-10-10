@@ -24,6 +24,7 @@ p{margin:6px 0;line-height:1.45;color:var(--mu)}
 .logo{flex:1;font-size:14px;background:linear-gradient(90deg,var(--cy),var(--ma));-webkit-background-clip:text;background-clip:text;color:transparent}
 select,input[type=text],input[type=date],input[type=time],input[type=password],input[type=number]{background:var(--dark);color:var(--tx);border:3px solid #000;padding:0 10px;min-height:44px;font-size:16px;width:100%;font-family:inherit;border-radius:0}
 select{width:auto;max-width:130px}
+.pwwrap{position:relative}.pwwrap input{padding-right:50px}.pwt{position:absolute;right:0;top:0;width:44px;height:44px;border:0;background:transparent;font-size:18px;color:var(--tx);padding:0}
 .icobtn{width:44px;height:44px;border:3px solid #000;background:var(--card);font-size:20px;color:var(--tx);box-shadow:inset 0 3px 0 rgba(255,255,255,.12)}
 .me{display:flex;gap:12px;align-items:center;margin-top:10px}
 .av{width:64px;height:64px;flex:none;border:3px solid #000;background:var(--card);box-shadow:inset 0 3px 0 rgba(255,255,255,.12),inset 0 -4px 0 rgba(0,0,0,.35);font-size:34px;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--tx)}
@@ -235,7 +236,23 @@ toastBadge:["Neues Abzeichen: {0}","New badge: {0}","Nouveau badge : {0}","Nuovo
 skinBought:["Skin freigeschaltet!","Skin unlocked!","Skin débloqué !","Skin sbloccato!","¡Skin desbloqueado!","Skin odblokowany!"],
 vicT:["QUEST-SIEG!","QUEST VICTORY!","VICTOIRE !","QUEST VINTA!","¡MISIÓN CUMPLIDA!","ZWYCIĘSTWO!"],
 vicS:["Alles geschafft","All done","Tout est fait","Tutto fatto","Todo hecho","Wszystko zrobione"],
+assignTo:["Zuweisen an","Assign to","Assigner à","Assegna a","Asignar a","Przypisz do"],
+assignMe:["Mir selbst","Myself","Moi-même","Me stesso","Yo mismo","Mnie"],
+byParent:["von {0}","from {0}","de {0}","da {0}","de {0}","od {0}"],
+taskAssigned:["Aufgabe zugewiesen","Task assigned","Tâche assignée","Attività assegnata","Tarea asignada","Zadanie przypisane"],
+famPending:["Wartet auf Bestätigung","Waiting for approval","En attente de validation","In attesa di conferma","Esperando aprobación","Czeka na zatwierdzenie"],
+famNoPend:["Nichts zu bestätigen.","Nothing to approve.","Rien à valider.","Niente da confermare.","Nada que aprobar.","Nic do zatwierdzenia."],
+famTasks:["Zugewiesene Aufgaben","Assigned tasks","Tâches assignées","Attività assegnate","Tareas asignadas","Przypisane zadania"],
+famNoTasks:["Keine zugewiesenen Aufgaben.","No assigned tasks.","Aucune tâche assignée.","Nessuna attività assegnata.","Sin tareas asignadas.","Brak przypisanych zadań."],
+famNewTask:["Aufgabe zuweisen","Assign task","Assigner une tâche","Assegna attività","Asignar tarea","Przypisz zadanie"],
+famNewRew:["Belohnung hinzufügen","Add reward","Ajouter une récompense","Aggiungi ricompensa","Añadir recompensa","Dodaj nagrodę"],
+famDecline:["Ablehnen","Decline","Refuser","Rifiuta","Rechazar","Odrzuć"],
+kidWait:["Deine Eltern bestätigen das in ihrem Konto.","Your parent confirms this in their account.","Tes parents valident cela dans leur compte.","I tuoi genitori lo confermano nel loro account.","Tus padres lo confirman en su cuenta.","Twoi rodzice zatwierdzą to na swoim koncie."],
+kidParentOnly:["Das verwalten deine Eltern.","Your parents manage this.","Tes parents gèrent cela.","Lo gestiscono i tuoi genitori.","Esto lo gestionan tus padres.","Zarządzają tym Twoi rodzice."],
+kidApproved:["Bestätigt! 🎉","Approved! 🎉","Validé ! 🎉","Confermato! 🎉","¡Aprobado! 🎉","Zatwierdzone! 🎉"],
 aLang:["Sprache","Language","Langue","Lingua","Idioma","Język"],
+showPw:["Passwort anzeigen","Show password","Afficher le mot de passe","Mostra password","Mostrar contraseña","Pokaż hasło"],
+hidePw:["Passwort verbergen","Hide password","Masquer le mot de passe","Nascondi password","Ocultar contraseña","Ukryj hasło"],
 aSnd:["Ton an/aus","Sound on/off","Son activé/désactivé","Audio acceso/spento","Sonido activado/desactivado","Dźwięk wł./wył."],
 aAv:["Profil öffnen","Open profile","Ouvrir le profil","Apri il profilo","Abrir perfil","Otwórz profil"],
 aChk:["Erledigt","Done","Terminé","Fatto","Hecho","Zrobione"],
@@ -330,7 +347,7 @@ const lvl=()=>Math.floor(S.xp/100)+1;
 function fmtDate(s){const d=pd(s),w=WD[S.lang][d.getDay()],m=MO[S.lang][d.getMonth()],n=d.getDate();
  if(S.lang==="en")return w+", "+m+" "+n;if(S.lang==="de"||S.lang==="pl")return w+" "+n+". "+m;return w+" "+n+" "+m}
 function def(){return{lang:"en",bg:"",acc:"",sound:true,xp:0,coins:0,name:"",photo:"",usePhoto:false,skin:"🧟",owned:["🧟"],items:[],done:{},pend:{},act:{},rewards:[{id:"r1",k:"rw1",c:150},{id:"r2",k:"rw2",c:100},{id:"r3",k:"rw3",c:250}],pin:"",best:0,badges:[],tipSeen:{},tipN:0,vic:{},jokeOpen:{}}}
-let USER=null,saveT=null,dirty=false,LM="login",ADMIN=false,ADM={users:[],allow:true},ROLE="adult",MUST=false,RL="child",FAM={children:[]};
+let FAMC=false,USER=null,saveT=null,dirty=false,LM="login",ADMIN=false,ADM={users:[],allow:true},ROLE="adult",MUST=false,RL="child",FAM={children:[]};
 function load(){S=def();try{const l=localStorage.getItem("qb.lang");if(l&&LANGS.some(x=>x[0]===l))S.lang=l}catch(e){}}
 function save(){try{localStorage.setItem("qb.lang",S.lang)}catch(e){}if(!USER)return;dirty=true;clearTimeout(saveT);saveT=setTimeout(push,600)}
 async function push(keep){if(!USER||!dirty||MUST)return;dirty=false;
@@ -410,11 +427,11 @@ function award(it,d,el){
  if(S.act[td]===3&&!S.jokeOpen[td])setTimeout(()=>openJoke(true),1500)}
 function undo(it,d){const dd=doneDate(it,d);setDone(it,d,false);S.xp=Math.max(0,S.xp-it.xp);S.coins=Math.max(0,S.coins-it.xp);S.act[dd]=Math.max(0,(S.act[dd]||0)-1);sfx.undo();save();render()}
 function toggle(it,d,el){
- if(isDone(it,d)){const go=()=>undo(it,d);if(it.ap&&S.pin)pinAsk(go);else go()}
+ if(isDone(it,d)){if(FAMC&&it.ap){toast(t("kidParentOnly"));sfx.undo();return}const go=()=>undo(it,d);if(it.ap&&S.pin)pinAsk(go);else go()}
  else if(isPend(it,d)){setPend(it,d,false);sfx.undo();save();render()}
  else if(it.ap){setPend(it,d,true);sfx.ok();save();render()}
  else{setDone(it,d,true);award(it,d,el)}}
-const guard=cb=>S.pin?pinAsk(cb):cb();
+const guard=cb=>{if(FAMC){toast(t("kidParentOnly"));sfx.undo();return}S.pin?pinAsk(cb):cb()};
 function dbl(btn,fn){if(btn.dataset.armed){fn();return}btn.dataset.armed="1";const o=btn.textContent;btn.textContent=t("sure");setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent=o}},3000)}
 
 /* ===== Sheets ===== */
@@ -427,9 +444,9 @@ function pinAsk(cb){
  s.querySelector("#pinok").onclick=go;inp.onkeydown=e=>{if(e.key==="Enter")go()}}
 
 /* Quest-Formular */
-let F;
+let F,FAMC_TO="";
 function openForm(){
- const td=todayS();F={kind:"task",rec:"once",date:td,days:[pd(td).getDay()],touched:false,size:"mid",ap:false};
+ const td=todayS();F={kind:"task",rec:"once",date:td,days:[pd(td).getDay()],touched:false,size:"mid",ap:false,to:FAMC_TO};FAMC_TO="";
  const seg=(g,arr)=>`<div class="seg">${arr.map(a=>`<button data-f="${g}" data-v="${a[0]}">${a[1]}</button>`).join("")}</div>`;
  const wdo=[1,2,3,4,5,6,0];
  const s=sheet(`<h3>${t("newQ")}</h3>
@@ -440,13 +457,14 @@ function openForm(){
  <label id="f-dl">${t("date")}</label><input type="date" id="f-date" value="${td}">
  <label>${t("time")}</label><input type="time" id="f-time">
  <div id="f-size"><label>${t("size")}</label>${seg("size",[["easy",t("easy")],["mid",t("mid")],["boss",t("boss")]])}</div>
- <label>${t("parent")}</label>${seg("ap",[["false",t("pNo")],["true",t("pYes")]])}
+ ${(ROLE==="adult"&&FAM.children.length)?`<label>${t("assignTo")}</label><div class="seg"><button data-f="to" data-v="">${t("assignMe")}</button>${FAM.children.map(c=>`<button data-f="to" data-v="${esc(c.name)}">🧒 ${esc(c.name)}</button>`).join("")}</div>`:""}
+ ${FAMC?"":`<label>${t("parent")}</label>${seg("ap",[["false",t("pNo")],["true",t("pYes")]])}`}
  <p id="f-ph" class="warn" hidden>${t("pinHint")}</p>
  <div class="btns"><button class="btn gh" data-a="close">${t("cancel")}</button><button class="btn" data-a="fsave">${t("save")}</button></div>`);
  fsync()}
 function fsync(){const s=$(".sheet");if(!s||!F||!$("#f-days"))return;
  s.querySelectorAll("[data-f]").forEach(b=>{const g=b.dataset.f,v=b.dataset.v;b.classList.toggle("on",g==="day"?F.days.includes(+v):String(F[g])===v)});
- $("#f-days").hidden=F.rec!=="weekly";$("#f-size").hidden=F.kind!=="task";$("#f-ph").hidden=!(F.ap&&!S.pin);$("#f-dl").textContent=t(F.rec==="once"?"date":"startDate")}
+ $("#f-days").hidden=F.rec!=="weekly";$("#f-size").hidden=F.kind!=="task";$("#f-ph").hidden=!(F.ap&&!S.pin&&!F.to);$("#f-dl").textContent=t(F.rec==="once"?"date":"startDate")}
 function fclick(b){const g=b.dataset.f,v=b.dataset.v;
  if(g==="day"){const n=+v;F.touched=true;const i=F.days.indexOf(n);if(i>=0)F.days.splice(i,1);else F.days.push(n)}
  else{F[g]=v==="true"?true:v==="false"?false:v;if(g==="rec"&&v==="weekly"&&!F.touched)F.days=[pd(F.date).getDay()]}
@@ -457,6 +475,7 @@ function fsave(){
  const date=$("#f-date").value||todayS();
  const xp=F.kind==="event"?10:({easy:10,mid:20,boss:40})[F.size];
  let days=F.days.slice().sort();if(F.rec==="weekly"&&!days.length)days=[pd(date).getDay()];
+ if(F.to){const bt=document.querySelector("[data-a=fsave]");if(bt)bt.disabled=true;api("/api/family/task","POST",{username:F.to,title,kind:F.kind,rec:F.rec,date,days,time:$("#f-time").value||"",size:F.size,ap:F.ap}).then(r=>{if(r.ok){sfx.save();closeSheet();toast(t("taskAssigned"));loadFamily()}else{if(bt)bt.disabled=false;toast(t("errNet"))}});return}
  S.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:title,kind:F.kind,rec:F.rec,date,days:F.rec==="weekly"?days:[],dom:pd(date).getDate(),time:$("#f-time").value||"",xp,ap:F.ap});
  save();sfx.save();closeSheet();render()}
 
@@ -510,12 +529,12 @@ function row(it,d,confirmBtn){
  const meta=[it.kind==="task"?"⚔️":"📌"];
  if(it.time)meta.push(esc(it.time));
  if(it.rec!=="once")meta.push(recLabel(it));
- if(it.ap)meta.push("👪");
+ if(it.by)meta.push("👪 "+esc(t("byParent",it.by)));else if(it.ap)meta.push("👪");
  meta.push("+"+it.xp+" XP");
- let mt=meta.join(" · ");if(pe)mt+=" · ⏳ "+t("pendTxt");
+ let mt=meta.join(" · ");if(pe)mt+=" · ⏳ "+t(FAMC?"kidWait":"pendTxt");
  return `<div class="row ${dn?"done":pe?"pend":""}"><button class="chk" data-a="chk" data-id="${it.id}" data-d="${d}" aria-label="${esc(t("aChk"))}">${dn?"✓":pe?"⏳":""}</button>
  <div class="rt"><div class="tt">${esc(it.t)}</div><div class="mt">${mt}</div></div>
- ${(pe&&confirmBtn)?`<button class="btn sm" data-a="confirm" data-id="${it.id}" data-d="${d}">${t("confirm")}</button>`:""}</div>`}
+ ${(pe&&confirmBtn&&!FAMC)?`<button class="btn sm" data-a="confirm" data-id="${it.id}" data-d="${d}">${t("confirm")}</button>`:""}</div>`}
 function tipCard(td){
  const L=TIPS[S.lang]||TIPS.de,i=(dayNum(td)+S.tipN)%L.length,tp=L[i],seen=S.tipSeen[td];
  return `<div class="card"><h3>${t("tip")}</h3><div class="tipc"><div class="e">${TE[i]}</div><div><b>${esc(tp[0])}</b><span>${esc(tp[1])}</span></div></div>
@@ -549,7 +568,7 @@ function viewPlan(){
    if(rec==="weekly")m.push((it.days||[]).slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>WD[S.lang][x]).join(" "));
    if(rec==="monthly")m.push(it.dom+".");
    if(it.time)m.push(esc(it.time));m.push("+"+it.xp+" XP");
-   return `<div class="row"><div class="rt"><div class="tt">${esc(it.t)}</div><div class="mt">${m.join(" · ")}</div></div><div class="sm2"><button class="ib${it.ap?"":" off"}" data-a="ap" data-id="${it.id}" aria-label="${esc(t("aPin"))}">👪</button><button class="ib" data-a="del" data-id="${it.id}" aria-label="${esc(t("del"))}">🗑️</button></div></div>`}).join("")});
+   return `<div class="row"><div class="rt"><div class="tt">${esc(it.t)}</div><div class="mt">${m.join(" · ")}</div></div><div class="sm2">${(FAMC||it.by)?"":`<button class="ib${it.ap?"":" off"}" data-a="ap" data-id="${it.id}" aria-label="${esc(t("aPin"))}">👪</button>`}${it.by?"":`<button class="ib" data-a="del" data-id="${it.id}" aria-label="${esc(t("del"))}">🗑️</button>`}</div></div>`}).join("")});
  if(!any)h+=`<div class="card"><p>${t("emptyDay")}</p></div>`;
  return h}
 function viewAcct(){
@@ -568,12 +587,13 @@ function viewLoot(){
  let h=`<h2>${t("badges")}</h2><div class="card"><div class="grid">${BD.map(b=>{const got=S.badges.includes(b[0]);return `<div class="cell${got?"":" lock"}"><div class="e">${b[1]}</div><div>${t(b[2])}</div><div>${t("days",b[0])}</div></div>`}).join("")}</div></div>`;
  h+=`<h2>${t("skins")}</h2><div class="card"><div class="grid">${SK.map(k=>{const own=S.owned.includes(k[0]),wear=!S.usePhoto&&S.skin===k[0];
   return `<button class="cell${wear?" on":""}${(!own&&S.coins<k[1])?" dim":""}" data-a="skin" data-v="${k[0]}"><div class="e">${k[0]}</div><div>${own?(wear?t("worn"):t("wear")):"🪙 "+k[1]}</div></button>`}).join("")}</div></div>`;
- h+=`<h2>${t("rewards")}</h2>`+S.rewards.map(r=>`<div class="row"><div class="rt"><div class="tt">${esc(rewName(r))}</div><div class="mt">🪙 ${r.c}</div></div><button class="btn sm" data-a="redeem" data-id="${r.id}"${S.coins<r.c?" disabled":""}>${t("redeem")}</button><button class="ib" data-a="rwdel" data-id="${r.id}" aria-label="${esc(t("del"))}">✕</button></div>`).join("");
- h+=`<div class="card"><label style="margin-top:0">${t("rwName")}</label><input type="text" id="rwn" maxlength="40"><label>${t("rwPrice")}</label><input type="number" id="rwc" inputmode="numeric" min="1"><div class="btns"><button class="btn" data-a="rwadd">${t("add")}</button></div></div>`;
+ h+=`<h2>${t("rewards")}</h2>`+S.rewards.map(r=>`<div class="row"><div class="rt"><div class="tt">${esc(rewName(r))}</div><div class="mt">🪙 ${r.c}</div></div><button class="btn sm" data-a="redeem" data-id="${r.id}"${S.coins<r.c?" disabled":""}>${t("redeem")}</button>${FAMC?"":`<button class="ib" data-a="rwdel" data-id="${r.id}" aria-label="${esc(t("del"))}">✕</button>`}</div>`).join("");
+ if(!FAMC)h+=`<div class="card"><label style="margin-top:0">${t("rwName")}</label><input type="text" id="rwn" maxlength="40"><label>${t("rwPrice")}</label><input type="number" id="rwc" inputmode="numeric" min="1"><div class="btns"><button class="btn" data-a="rwadd">${t("add")}</button></div></div>`;
  if(PP){h+=`<h2>${t("payT")}</h2><div class="card"><p>${t("payTxt")}</p><p class="warn">${t("payAsk")}</p>
   <div class="pay"><a class="btn" href="${PP.replace(/\/$/,"")}/0.20EUR" target="_blank" rel="noopener">0,20 €</a><a class="btn" href="${PP.replace(/\/$/,"")}/0.60EUR" target="_blank" rel="noopener">0,60 €</a></div>
   <label>${t("amount")}</label><input type="text" id="ppamt" inputmode="decimal" placeholder="${esc(t("amtPh"))}" autocomplete="off">
   <div class="btns"><a class="btn" id="ppgo" href="${PP.replace(/\/$/,"")}" target="_blank" rel="noopener">${t("amtGo")}</a></div></div>`}
+ if(FAMC)return h;
  h+=`<h2>${t("parentArea")}</h2><div class="card"><label style="margin-top:0">${t("pinSetLbl")}</label>`;
  if(S.pin)h+=`<p>✅ ${t("pinOn")}</p><div class="btns"><button class="btn gh" data-a="pindel">${t("pinDel")}</button></div>`;
  else h+=`<input type="password" id="pinnew" inputmode="numeric" maxlength="4" autocomplete="off"><div class="btns"><button class="btn" data-a="pinset">${t("pinSet")}</button></div>`;
@@ -601,8 +621,17 @@ function childSheet(){const s=sheet(`<h3>${t("famAdd")}</h3><label>${t("user")}<
   if(p.length<8){er.textContent=t("errPass");return}
   const r=await api("/api/family/child","POST",{username:u,password:p});
   if(r.ok){closeSheet();sfx.save();loadFamily()}else{const m={taken:"errTaken",user:"errUser",pass:"errPass",rate:"errRate",closed:"errClosed",limit:"famLimit"};er.textContent=t(m[r.j.error]||"errNet")}}}
-async function loadFamily(){try{const r=await api("/api/family");if(r.ok){FAM={children:r.j.children||[]};render()}}catch(e){}}
-function famBlock(){return `<h2>${t("famT")}</h2><div class="card"><h3>${t("famChildren")} (${FAM.children.length})</h3>`+(FAM.children.length?FAM.children.map(c=>`<div class="row"><div class="rt"><div class="tt">🧒 ${esc(c.name)}</div><div class="mt">${t("lvl",Math.floor(c.xp/100)+1)} · ${esc(String(c.created||"").slice(0,10))}</div></div><button class="ib" data-a="fampw" data-n="${esc(c.name)}" aria-label="${esc(t("admPw"))}">🔑</button><button class="ib" data-a="famdel" data-n="${esc(c.name)}" aria-label="${esc(t("del"))}">🗑️</button></div>`).join(""):`<p>${t("famNone")}</p>`)+`<div class="btns"><button class="btn" data-a="famadd">${t("famAdd")}</button></div></div>`}
+async function loadFamily(){try{const r=await api("/api/family");if(r.ok){FAM={children:(r.j.children||[]).map(c=>Object.assign({pending:[],tasks:[],rewards:[]},c))};if(!document.querySelector(".sbg"))render()}}catch(e){}}
+function rewSheet(n){const s=sheet(`<h3>${t("famNewRew")}</h3><p>${esc(n)}</p><label>${t("rwName")}</label><input type="text" id="frn" maxlength="40"><label>${t("rwPrice")}</label><input type="number" id="frc" inputmode="numeric" min="1"><div class="err" id="frerr"></div><div class="btns"><button class="btn gh" data-a="close">${t("cancel")}</button><button class="btn" id="frok">OK</button></div>`);
+ s.querySelector("#frok").onclick=async()=>{const nm=s.querySelector("#frn").value.trim(),c=Math.floor(Number(s.querySelector("#frc").value));if(!nm||!(c>0)){s.querySelector("#frerr").textContent=t("titleNeed");return}
+  const r=await api("/api/family/reward","POST",{username:n,name:nm,cost:c});if(r.ok){closeSheet();sfx.save();loadFamily()}else s.querySelector("#frerr").textContent=t("errNet")}}
+function famBlock(){return `<h2>${t("famT")}</h2>`+(FAM.children.length?FAM.children.map(c=>{const n=esc(c.name);
+ return `<div class="card"><div class="row" style="margin-top:0"><div class="rt"><div class="tt">🧒 ${n}</div><div class="mt">${t("lvl",Math.floor(c.xp/100)+1)} · ${esc(String(c.created||"").slice(0,10))}</div></div><button class="ib" data-a="fampw" data-n="${n}" aria-label="${esc(t("admPw"))}">🔑</button><button class="ib" data-a="famdel" data-n="${n}" aria-label="${esc(t("del"))}">🗑️</button></div>
+ <h3 style="margin-top:14px">⏳ ${t("famPending")}</h3>`+(c.pending.length?c.pending.map(x=>`<div class="row"><div class="rt"><div class="tt">${esc(x.t)}</div><div class="mt">${esc(fmtDate(x.d))} · +${x.xp} XP</div></div><button class="btn sm" data-a="famok" data-n="${n}" data-id="${esc(x.id)}" data-d="${esc(x.d)}">${t("confirm")}</button><button class="ib" data-a="famno" data-n="${n}" data-id="${esc(x.id)}" data-d="${esc(x.d)}" aria-label="${esc(t("famDecline"))}">✕</button></div>`).join(""):`<p>${t("famNoPend")}</p>`)+
+ `<h3 style="margin-top:14px">⚔️ ${t("famTasks")}</h3>`+(c.tasks.length?c.tasks.map(x=>`<div class="row"><div class="rt"><div class="tt">${esc(x.t)}</div><div class="mt">${esc(t(x.rec))}${x.rec==="once"?" · "+esc(fmtDate(x.date)):""}${x.time?" · "+esc(x.time):""} · +${x.xp} XP${x.ap?" · 👪":""}</div></div><button class="ib" data-a="famtdel" data-n="${n}" data-id="${esc(x.id)}" aria-label="${esc(t("del"))}">🗑️</button></div>`).join(""):`<p>${t("famNoTasks")}</p>`)+
+ `<div class="btns"><button class="btn sm" data-a="famtask" data-n="${n}">${t("famNewTask")}</button></div>
+ <h3 style="margin-top:14px">🎁 ${t("rewards")}</h3>`+c.rewards.map(r=>`<div class="row"><div class="rt"><div class="tt">${esc(r.k?t(r.k):r.n)}</div><div class="mt">🪙 ${r.c}</div></div><button class="ib" data-a="famrdel" data-n="${n}" data-id="${esc(r.id)}" aria-label="${esc(t("del"))}">✕</button></div>`).join("")+
+ `<div class="btns"><button class="btn sm" data-a="famradd" data-n="${n}">${t("famNewRew")}</button></div></div>`}).join(""):`<div class="card"><p>${t("famNone")}</p></div>`)+`<div class="btns"><button class="btn" data-a="famadd">${t("famAdd")}</button></div>`}
 async function loadAdmin(){try{const r=await api("/api/admin/users");if(r.ok){ADM={users:r.j.users||[],allow:!!r.j.allowReg};render()}}catch(e){}}
 function admBlock(){return `<h2>${t("admT")}</h2><div class="card"><button class="btn sm" data-a="admreg">${t(ADM.allow?"admRegOn":"admRegOff")}</button><h3 style="margin-top:14px">${t("admUsers")} (${ADM.users.length})</h3>`+ADM.users.map(u=>`<div class="row"><div class="rt"><div class="tt">${u.role==="child"?"🧒":"🧑"} ${esc(u.name)}${u.admin?" 👑":""}</div><div class="mt">${t("lvl",Math.floor(u.xp/100)+1)} · ${esc(String(u.created||"").slice(0,10))}</div></div><button class="ib" data-a="admpw" data-n="${esc(u.name)}" aria-label="${esc(t("admPw"))}">🔑</button>${u.admin?"":`<button class="ib" data-a="admdel" data-n="${esc(u.name)}" aria-label="${esc(t("del"))}">🗑️</button>`}</div>`).join("")+`</div>`}
 function renderLogin(err){
@@ -623,14 +652,14 @@ async function doAuth(btn){
  if(!p){er.textContent=t("errLogin");return}
  btn.disabled=true;er.textContent="";
  try{const r=await api(LM==="login"?"/api/login":"/api/register","POST",{username:u,password:p,role:RL});
-  if(r.ok&&r.j.user){USER=r.j.user;ADMIN=!!r.j.admin;ROLE=r.j.role||"adult";MUST=!!r.j.mustChange;const lang=S.lang,st=r.j.state;S=Object.assign(def(),st||{});if(!st||!st.lang)S.lang=lang;tab="today";
-   if(LM==="register"||!st||!Object.keys(st).length){dirty=true;push()}render();sfx.ok();return}
+  if(r.ok&&r.j.user){USER=r.j.user;ADMIN=!!r.j.admin;ROLE=r.j.role||"adult";MUST=!!r.j.mustChange;FAMC=!!r.j.family;const lang=S.lang,st=r.j.state;S=Object.assign(def(),st||{});if(!st||!st.lang)S.lang=lang;tab="today";
+   if(LM==="register"||!st||!Object.keys(st).length){dirty=true;push()}render();sfx.ok();if(ROLE==="adult")loadFamily();if(FAMC)applyGrants(r.j.grants);return}
   const m={bad:"errLogin",taken:"errTaken",user:"errUser",pass:"errPass",rate:"errRate",closed:"errClosed"};
   er.textContent=t(m[r.j.error]||"errNet")}
  catch(e){er.textContent=t("errNet")}
  btn.disabled=false}
 async function doLogout(){clearTimeout(saveT);await push();try{await api("/api/logout","POST",{})}catch(e){}
- const l=S.lang;USER=null;ADMIN=false;ADM={users:[],allow:true};ROLE="adult";MUST=false;FAM={children:[]};S=def();S.lang=l;tab="today";LM="login";render()}
+ const l=S.lang;USER=null;ADMIN=false;ADM={users:[],allow:true};ROLE="adult";MUST=false;FAMC=false;FAM={children:[]};S=def();S.lang=l;tab="today";LM="login";render()}
 function render(){
  if(!USER){renderLogin();return}
  if(MUST){renderMust();return}
@@ -686,6 +715,11 @@ function act(a,b){
  case "fampw":pwSheet(b.dataset.n,"/api/family/password");break;
  case "famdel":dbl(b,()=>api("/api/family/delete","POST",{username:b.dataset.n}).then(()=>loadFamily()));break;
  case "famadd":childSheet();break;
+ case "famok":case "famno":api(a==="famok"?"/api/family/confirm":"/api/family/reject","POST",{username:b.dataset.n,id:b.dataset.id,d:b.dataset.d}).then(r=>{if(r.ok)sfx.ok();loadFamily()});break;
+ case "famtask":FAMC_TO=b.dataset.n;openForm();break;
+ case "famtdel":dbl(b,()=>api("/api/family/taskdel","POST",{username:b.dataset.n,id:b.dataset.id}).then(()=>loadFamily()));break;
+ case "famradd":rewSheet(b.dataset.n);break;
+ case "famrdel":dbl(b,()=>api("/api/family/rewarddel","POST",{username:b.dataset.n,id:b.dataset.id}).then(()=>loadFamily()));break;
  case "rl":RL=b.dataset.v;document.querySelectorAll("[data-a=rl]").forEach(x=>x.classList.toggle("on",x.dataset.v===RL));break;
  case "pwgo":doChangePw(b);break;
  case "pwopen":sheet(`<h3>${t("pwChange")}</h3>${pwFields()}<div class="btns"><button class="btn gh" data-a="close">${t("cancel")}</button><button class="btn" data-a="pwgo">${t("save")}</button></div>`);break;
@@ -706,11 +740,28 @@ document.addEventListener("change",e=>{
  if(e.target.id==="pfile"&&P&&e.target.files[0]){procPhoto(e.target.files[0],u=>{P.photo=u;P.usePhoto=true;profSync()})}});
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="lp"){const b=$("[data-a=lgo]");if(b&&!b.disabled)b.click()}});
 window.addEventListener("pagehide",()=>{clearTimeout(saveT);push(true)});
-document.addEventListener("visibilitychange",async()=>{
- if(document.visibilityState!=="visible"||!USER||MUST||dirty||document.querySelector(".sbg"))return;
- try{const r=await api("/api/me");if(r.ok&&r.j.user&&r.j.state&&!dirty&&!document.querySelector(".sbg")){S=Object.assign(def(),r.j.state);render()}else if(r.ok&&!r.j.user){USER=null;render()}}catch(e){}});
+async function applyGrants(gs){if(!gs||!gs.length)return;let n=0;
+ gs.forEach(g=>{const it=S.items.find(x=>x.id===g.id);if(!it)return;
+  if(g.type==="ok"&&isPend(it,g.d)&&!isDone(it,g.d)){setPend(it,g.d,false);setDone(it,g.d,true);toast(t("kidApproved"));award(it,g.d,null);n++}
+  else if(g.type==="no"&&isPend(it,g.d)){setPend(it,g.d,false);n++}});
+ clearTimeout(saveT);dirty=true;await push();
+ try{await api("/api/ack","POST",{ids:gs.map(g=>g.n)})}catch(e){}render()}
+let syncing=false;
+async function syncFam(){
+ if(syncing||document.visibilityState!=="visible"||!USER||MUST||dirty||document.querySelector(".sbg"))return;syncing=true;
+ try{const r=await api("/api/me");if(r.ok&&r.j.user&&r.j.state&&!dirty&&!document.querySelector(".sbg")){FAMC=!!r.j.family;const xp0=S.xp;S=Object.assign(def(),r.j.state);render();if(FAMC)await applyGrants(r.j.grants)}else if(r.ok&&!r.j.user){USER=null;render()}}catch(e){}
+ syncing=false}
+document.addEventListener("visibilitychange",syncFam);
+setInterval(()=>{if(!USER)return;if(FAMC)syncFam();else if(ROLE==="adult"&&tab==="acct"&&document.visibilityState==="visible"&&!document.querySelector(".sbg"))loadFamily()},20000);
+function pwEnhance(){document.querySelectorAll("input[type=password]:not([inputmode=numeric])").forEach(i=>{
+ if(i.parentNode&&i.parentNode.classList&&i.parentNode.classList.contains("pwwrap"))return;
+ const focus=document.activeElement===i,w=document.createElement("div");w.className="pwwrap";i.parentNode.insertBefore(w,i);w.appendChild(i);
+ const b=document.createElement("button");b.type="button";b.className="pwt";b.textContent="👁️";b.setAttribute("aria-label",t("showPw"));
+ b.onclick=()=>{const show=i.type==="password";i.type=show?"text":"password";b.textContent=show?"🙈":"👁️";b.setAttribute("aria-label",t(show?"hidePw":"showPw"));i.focus()};
+ w.appendChild(b);if(focus)i.focus()})}
+new MutationObserver(pwEnhance).observe(document.body,{childList:true,subtree:true});
 load();
-(async()=>{try{const r=await api("/api/me");if(r.ok&&r.j.user){USER=r.j.user;ADMIN=!!r.j.admin;ROLE=r.j.role||"adult";MUST=!!r.j.mustChange;const lang=S.lang;S=Object.assign(def(),r.j.state||{});if(!r.j.state||!r.j.state.lang)S.lang=lang}}catch(e){}render()})();
+(async()=>{try{const r=await api("/api/me");if(r.ok&&r.j.user){USER=r.j.user;ADMIN=!!r.j.admin;ROLE=r.j.role||"adult";MUST=!!r.j.mustChange;FAMC=!!r.j.family;const lang=S.lang;S=Object.assign(def(),r.j.state||{});if(!r.j.state||!r.j.state.lang)S.lang=lang;render();if(ROLE==="adult"&&!MUST)loadFamily();if(FAMC&&!MUST)applyGrants(r.j.grants)}}catch(e){}render()})();
 </script>
 </body>
 </html>
