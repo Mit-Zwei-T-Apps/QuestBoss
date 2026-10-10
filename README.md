@@ -1,6 +1,6 @@
 # QuestBoss
 
-A game-style daily planner for kids and teens (built with ADHD in mind): quests, XP, levels, coins, streaks, badges, skins and parent-approved rewards. Accounts are real (server-side storage), with child and adult account types and a Family area.
+A game-style daily planner for kids and teens : quests, XP, levels, coins, streaks, badges, skins and parent-approved rewards. Accounts are real (server-side storage), with child and adult account types and a Family area.
 
 - Zero dependencies, Node.js >= 18
 - Data in `data/db.json` (atomic writes), passwords hashed with scrypt, HttpOnly session cookie
