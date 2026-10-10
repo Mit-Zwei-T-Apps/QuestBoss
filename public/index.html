@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#120f22">
+<title>QuestBoss</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#120f22;--card:#221c3d;--dark:#0c0a18;--tx:#f4f1ff;--mu:#a79fd0;--cy:#19e3ff;--ma:#ff3df2;--gr:#5cd13a;--ye:#ffe14d;--px:"Press Start 2P",ui-monospace,monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(115deg,rgba(25,227,255,.13) 0 50%,rgba(255,61,242,.13) 50% 100%)}
+#app{max-width:560px;margin:0 auto;padding:0 12px calc(150px + env(safe-area-inset-bottom))}
+h2,h3,.logo,.lv,.vt{font-family:var(--px);font-weight:400}
+h2{font-size:13px;margin:16px 0 10px;line-height:1.5}
+h3{font-size:11px;margin:0 0 10px;line-height:1.6}
+p{margin:6px 0;line-height:1.45;color:var(--mu)}
+.hud{padding:calc(10px + env(safe-area-inset-top)) 0 10px}
+.top{display:flex;align-items:center;gap:8px}
+.logo{flex:1;font-size:14px;background:linear-gradient(90deg,var(--cy),var(--ma));-webkit-background-clip:text;background-clip:text;color:transparent}
+select,input[type=text],input[type=date],input[type=time],input[type=password],input[type=number]{background:var(--dark);color:var(--tx);border:3px solid #000;padding:0 10px;min-height:44px;font-size:16px;width:100%;font-family:inherit;border-radius:0}
+select{width:auto;max-width:130px}
+.icobtn{width:44px;height:44px;border:3px solid #000;background:var(--card);font-size:20px;color:var(--tx);box-shadow:inset 0 3px 0 rgba(255,255,255,.12)}
+.me{display:flex;gap:12px;align-items:center;margin-top:10px}
+.av{width:64px;height:64px;flex:none;border:3px solid #000;background:var(--card);box-shadow:inset 0 3px 0 rgba(255,255,255,.12),inset 0 -4px 0 rgba(0,0,0,.35);font-size:34px;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--tx)}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.mi{flex:1;min-width:0}
+.lv{font-size:12px;margin-bottom:6px}
+.bar{height:20px;background:var(--dark);border:3px solid #000;overflow:hidden}
+.fill{height:100%;background:repeating-linear-gradient(45deg,#5cd13a 0 8px,#49b02b 8px 16px);transition:width .5s}
+.bar.big{height:16px;margin:8px 0}
+.stats{display:flex;gap:12px;margin-top:6px;font-weight:700;font-size:14px;flex-wrap:wrap}
+.split{height:5px;background:linear-gradient(90deg,var(--cy) 0 50%,var(--ma) 50% 100%);margin-bottom:4px}
+.card{background:var(--card);border:3px solid #000;box-shadow:inset 0 3px 0 rgba(255,255,255,.12),inset 0 -4px 0 rgba(0,0,0,.35);padding:12px;margin:10px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;background:var(--ye);color:#000;border:3px solid #000;box-shadow:0 4px 0 #000;font-weight:800;font-size:15px;text-decoration:none;cursor:pointer;font-family:inherit;border-radius:3px}
+.btn:active{transform:translateY(4px);box-shadow:none}
+.btn.sm{min-height:40px;padding:0 10px;font-size:14px}
+.btn.gh{background:var(--card);color:var(--tx)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.btn.ma{background:var(--ma);color:#fff}
+.btns{display:flex;gap:10px;margin-top:14px}
+.btns .btn{flex:1}
+.row{display:flex;align-items:center;gap:12px;background:var(--card);border:3px solid #000;box-shadow:inset 0 3px 0 rgba(255,255,255,.12),inset 0 -4px 0 rgba(0,0,0,.35);padding:10px;margin:8px 0}
+.chk{width:44px;height:44px;flex:none;background:var(--dark);border:3px solid #000;color:#fff;font-size:24px;font-weight:900;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 3px 0 rgba(255,255,255,.08)}
+.row.done .chk{background:var(--gr)}
+.row.pend .chk{background:var(--ye);font-size:20px}
+.rt{flex:1;min-width:0}
+.tt{font-weight:700;word-break:break-word}
+.mt{font-size:13px;color:var(--mu);margin-top:3px}
+.row.done .tt{text-decoration:line-through;color:var(--gr)}
+.row.pend .mt{color:var(--ye)}
+.pgbar{margin:6px 0 12px}
+.hello{font-family:var(--px);font-size:15px;line-height:1.5;margin:14px 0 0;word-break:break-word}
+.tipc{display:flex;gap:10px}
+.tipc .e{font-size:30px}
+.tipc b{display:block;margin-bottom:3px}
+.tipc span{color:var(--mu);line-height:1.45}
+.mini{display:flex;gap:8px;padding:6px 0;border-top:2px solid rgba(255,255,255,.08);font-size:15px}
+.mini:first-of-type{border-top:0}
+.mini.d{color:var(--gr);text-decoration:line-through}
+.mini .tm{color:var(--cy);min-width:44px}
+.dh{font-family:var(--px);font-size:10px;margin-bottom:6px;color:var(--cy)}
+.free{color:var(--mu);font-size:14px}
+.sm2{display:flex;gap:6px}
+.ib{width:42px;height:42px;border:3px solid #000;background:var(--dark);font-size:18px;padding:0;color:var(--tx)}
+.ib.off{opacity:.35}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.cell{background:var(--dark);border:3px solid #000;padding:8px 4px;text-align:center;font-size:12px;color:var(--tx);min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.cell .e{font-size:30px}
+.cell.lock{filter:grayscale(1);opacity:.4}
+.cell.dim{opacity:.55}
+.cell.on{border-color:var(--ye)}
+.warn{color:var(--ye);font-weight:700}
+.pay{display:flex;gap:10px;margin:10px 0}
+.pay .btn{flex:1}
+label{display:block;font-size:13px;color:var(--mu);margin:12px 0 6px;font-weight:700}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--dark);border-top:4px solid #000;padding-bottom:env(safe-area-inset-bottom)}
+.nav div{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.nav button{background:none;border:0;color:var(--mu);min-height:60px;font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.nav button span{font-size:22px}
+.nav button.on{color:var(--cy);box-shadow:inset 0 4px 0 var(--ma)}
+.fab{position:fixed;z-index:21;right:max(16px,calc(50vw - 264px));bottom:calc(76px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--ma);color:#fff;border:3px solid #000;box-shadow:0 4px 0 #000;font-size:34px;font-weight:900;line-height:1;padding:0}
+.fab:active{transform:translateY(4px);box-shadow:none}
+.sbg{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:var(--card);border:3px solid #000;border-bottom:0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:inset 0 3px 0 rgba(255,255,255,.12)}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{flex:1;min-width:64px;min-height:44px;background:var(--dark);color:var(--tx);border:3px solid #000;font-weight:700;font-size:14px;padding:0 8px}
+.seg button.on{background:var(--cy);color:#000}
+.err{color:#ff7b9c;min-height:20px;margin-top:6px;font-weight:700}
+.pv{display:flex;justify-content:center;margin:12px 0}
+.pv .av{width:96px;height:96px;font-size:54px}
+#toasts{position:fixed;top:calc(10px + env(safe-area-inset-top));left:0;right:0;z-index:90;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.toast{background:var(--dark);border:3px solid var(--cy);padding:8px 14px;font-weight:800;box-shadow:0 4px 0 #000;max-width:90vw;text-align:center;animation:ti .25s}
+@keyframes ti{from{transform:translateY(-14px);opacity:0}}
+.orb{position:fixed;left:0;top:0;width:12px;height:12px;border-radius:50%;background:#9dff3a;box-shadow:0 0 10px 3px #7dff2a;z-index:80;pointer-events:none}
+.conf{position:fixed;z-index:80;pointer-events:none}
+.flash{position:fixed;inset:0;z-index:85;pointer-events:none;background:linear-gradient(115deg,var(--cy) 0 50%,var(--ma) 50% 100%)}
+.vic{position:fixed;left:50%;top:38%;z-index:88;transform:translate(-50%,-50%) rotate(-6deg);background:var(--ye);color:#000;border:4px solid #000;box-shadow:6px 6px 0 #000;padding:16px 22px;text-align:center;pointer-events:none;animation:vp .5s}
+.vic .vt{font-size:16px;line-height:1.5}
+.vic div:last-child{font-weight:800;margin-top:6px}
+@keyframes vp{from{transform:translate(-50%,-50%) rotate(-6deg) scale(.3);opacity:0}}
+.joke q{display:block;font-size:18px;line-height:1.5;margin:10px 0;quotes:none;font-weight:700}
+.joke .pl{font-size:18px;color:var(--ye);font-weight:800;margin:10px 0}
+.av{position:relative}
+.av .acc{position:absolute;right:3px;top:1px;font-size:.42em;line-height:1;filter:drop-shadow(0 1px 0 #000)}
+.av.big{width:120px;height:120px;font-size:68px;margin:6px auto 10px}
+.charc{text-align:center}
+.cn{font-family:var(--px);font-size:13px;line-height:1.6;word-break:break-word;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{min-width:48px;min-height:48px;background:var(--dark);border:3px solid #000;font-size:24px;padding:0 8px;color:var(--tx)}
+.chips button.on{border-color:var(--ye)}
+.chips button.sw{width:48px;padding:0;font-size:16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.orb,.conf,.flash{display:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toasts" aria-live="polite"></div>
+<script>
+"use strict";
+/* ===== Konfiguration ===== */
+const PP="https://www.paypal.me/MarcusMichalak542";
+const LS="questlog.v1";
+const LANGS=[["de","Deutsch"],["en","English"],["fr","Français"],["it","Italiano"],["es","Español"],["pl","Polski"]];
+const RM=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SK=[["🧟",0],["🦊",80],["🥷",100],["🤖",120],["👾",160],["🧙",200],["🐉",250],["🚀",300]];
+const BD=[[3,"🪵","bd1"],[7,"🔩","bd2"],[14,"🥇","bd3"],[30,"💎","bd4"],[60,"👑","bd5"]];
+const WD={de:["So","Mo","Di","Mi","Do","Fr","Sa"],en:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],fr:["dim.","lun.","mar.","mer.","jeu.","ven.","sam."],it:["dom","lun","mar","mer","gio","ven","sab"],es:["dom","lun","mar","mié","jue","vie","sáb"],pl:["niedz.","pon.","wt.","śr.","czw.","pt.","sob."]};
+const MO={de:["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"],en:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],fr:["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."],it:["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"],es:["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"],pl:["sty","lut","mar","kwi","maj","cze","lip","sie","wrz","paź","lis","gru"]};
+
+/* ===== Texte: [de,en,fr,it,es,pl] ===== */
+const K={
+nav_today:["Heute","Today","Aujourd'hui","Oggi","Hoy","Dziś"],
+nav_plan:["Plan","Plan","Plan","Piano","Plan","Plan"],
+nav_loot:["Loot","Loot","Butin","Bottino","Botín","Łup"],
+lvl:["Level {0}","Level {0}","Niveau {0}","Livello {0}","Nivel {0}","Poziom {0}"],
+days:["{0} Tage","{0} days","{0} jours","{0} giorni","{0} días","{0} dni"],
+hello:["Hallo, {0}!","Hello, {0}!","Salut, {0} !","Ciao, {0}!","¡Hola, {0}!","Cześć, {0}!"],
+setProfile:["Name und Foto festlegen","Set name and photo","Choisir nom et photo","Imposta nome e foto","Elegir nombre y foto","Ustaw imię i zdjęcie"],
+dayQuest:["Tages-Quest: {0} von {1} geschafft","Daily quest: {0} of {1} done","Quête du jour : {0} sur {1} accomplies","Quest del giorno: {0} su {1} completate","Misión del día: {0} de {1} hechas","Zadanie dnia: {0} z {1} wykonane"],
+allDone:["Alles geschafft! 🎉","All done! 🎉","Tout est fait ! 🎉","Tutto fatto! 🎉","¡Todo hecho! 🎉","Wszystko zrobione! 🎉"],
+emptyDay:["Heute ist nichts geplant. Tippe auf + und starte deine erste Quest.","Nothing planned today. Tap + and start your first quest.","Rien de prévu aujourd'hui. Appuie sur + et lance ta première quête.","Oggi non c'è niente in programma. Tocca + e inizia la tua prima quest.","Hoy no hay nada planeado. Toca + y empieza tu primera misión.","Na dziś nic nie zaplanowano. Dotknij + i zacznij pierwszy quest."],
+overdue:["Noch offen von früher","Still open from before","Encore ouvert d'avant","Ancora aperte da prima","Pendiente de antes","Zaległe z wcześniej"],
+waiting:["Wartet auf Eltern","Waiting for parents","En attente des parents","In attesa dei genitori","Esperando a los padres","Czeka na rodziców"],
+confirm:["Bestätigen","Confirm","Confirmer","Conferma","Confirmar","Potwierdź"],
+pendTxt:["wartet auf Eltern","waiting for parents","attend les parents","attende i genitori","espera a los padres","czeka na rodziców"],
+next7:["Nächste 7 Tage","Next 7 days","7 prochains jours","Prossimi 7 giorni","Próximos 7 días","Najbliższe 7 dni"],
+free:["Frei","Free","Libre","Libero","Libre","Wolne"],
+allQ:["Alle Quests und Termine","All quests and appointments","Toutes les quêtes et rendez-vous","Tutte le quest e gli appuntamenti","Todas las misiones y citas","Wszystkie questy i terminy"],
+once:["Einmalig","Once","Une fois","Una volta","Una vez","Jednorazowo"],
+daily:["Täglich","Daily","Chaque jour","Ogni giorno","Cada día","Codziennie"],
+weekly:["Wöchentlich","Weekly","Chaque semaine","Ogni settimana","Cada semana","Co tydzień"],
+monthly:["Monatlich","Monthly","Chaque mois","Ogni mese","Cada mes","Co miesiąc"],
+newQ:["Neue Quest","New quest","Nouvelle quête","Nuova quest","Nueva misión","Nowy quest"],
+task:["Aufgabe","Task","Tâche","Compito","Tarea","Zadanie"],
+event:["Termin","Appointment","Rendez-vous","Appuntamento","Cita","Termin"],
+title:["Titel","Title","Titre","Titolo","Título","Tytuł"],
+titlePh:["Was steht an?","What's up?","Qu'est-ce qui est prévu ?","Cosa c'è da fare?","¿Qué toca hacer?","Co jest do zrobienia?"],
+titleNeed:["Bitte einen Titel eingeben","Please enter a title","Merci d'entrer un titre","Inserisci un titolo","Escribe un título","Wpisz tytuł"],
+repeat:["Wiederholung","Repeat","Répétition","Ripetizione","Repetición","Powtarzanie"],
+weekdays:["Wochentage","Weekdays","Jours de la semaine","Giorni della settimana","Días de la semana","Dni tygodnia"],
+date:["Datum","Date","Date","Data","Fecha","Data"],
+startDate:["Startdatum","Start date","Date de début","Data di inizio","Fecha de inicio","Data startu"],
+time:["Uhrzeit (optional)","Time (optional)","Heure (facultatif)","Ora (facoltativa)","Hora (opcional)","Godzina (opcjonalnie)"],
+size:["Größe","Size","Taille","Dimensione","Tamaño","Rozmiar"],
+easy:["Leicht +10 XP","Easy +10 XP","Facile +10 XP","Facile +10 XP","Fácil +10 XP","Łatwe +10 XP"],
+mid:["Mittel +20 XP","Medium +20 XP","Moyen +20 XP","Medio +20 XP","Medio +20 XP","Średnie +20 XP"],
+boss:["Boss +40 XP","Boss +40 XP","Boss +40 XP","Boss +40 XP","Jefe +40 XP","Boss +40 XP"],
+parent:["Eltern-Bestätigung","Parent approval","Validation des parents","Conferma dei genitori","Aprobación de los padres","Zatwierdzenie rodziców"],
+pNo:["Nicht nötig","Not needed","Pas nécessaire","Non necessaria","No necesaria","Niepotrzebne"],
+pYes:["👪 Eltern bestätigen","👪 Parents confirm","👪 Les parents valident","👪 Confermano i genitori","👪 Aprueban los padres","👪 Rodzice zatwierdzają"],
+pinHint:["Lege im Tab Loot eine PIN fest, damit nur deine Eltern bestätigen können.","Set a PIN in the Loot tab so only your parents can confirm.","Définis un code PIN dans l'onglet Butin pour que seuls tes parents valident.","Imposta un PIN nella scheda Bottino così solo i genitori possono confermare.","Crea un PIN en la pestaña Botín para que solo tus padres confirmen.","Ustaw PIN w zakładce Łup, aby tylko rodzice mogli zatwierdzać."],
+save:["Speichern","Save","Enregistrer","Salva","Guardar","Zapisz"],
+cancel:["Abbrechen","Cancel","Annuler","Annulla","Cancelar","Anuluj"],
+close:["Schließen","Close","Fermer","Chiudi","Cerrar","Zamknij"],
+del:["Löschen","Delete","Supprimer","Elimina","Eliminar","Usuń"],
+sure:["Sicher?","Sure?","Sûr ?","Sicuro?","¿Seguro?","Na pewno?"],
+badges:["Streak-Abzeichen","Streak badges","Badges de série","Badge delle serie","Insignias de racha","Odznaki serii"],
+bd1:["Holz","Wood","Bois","Legno","Madera","Drewno"],
+bd2:["Eisen","Iron","Fer","Ferro","Hierro","Żelazo"],
+bd3:["Gold","Gold","Or","Oro","Oro","Złoto"],
+bd4:["Diamant","Diamond","Diamant","Diamante","Diamante","Diament"],
+bd5:["Netherite","Netherite","Netherite","Netherite","Netherita","Netheryt"],
+skins:["Skins","Skins","Skins","Skin","Skins","Skiny"],
+wear:["Tragen","Wear","Porter","Indossa","Usar","Załóż"],
+worn:["Getragen","Worn","Porté","Indossato","En uso","Założony"],
+tooLittle:["Noch zu wenig Münzen","Not enough coins yet","Pas encore assez de pièces","Monete ancora insufficienti","Aún no hay monedas suficientes","Za mało monet"],
+rewards:["Echte Belohnungen","Real rewards","Vraies récompenses","Ricompense vere","Recompensas reales","Prawdziwe nagrody"],
+redeem:["Einlösen","Redeem","Échanger","Riscatta","Canjear","Odbierz"],
+rw1:["30 Min Zockzeit","30 min gaming time","30 min de jeu","30 min di gioco","30 min de juego","30 min grania"],
+rw2:["Lieblings-Snack","Favorite snack","Snack préféré","Snack preferito","Snack favorito","Ulubiona przekąska"],
+rw3:["30 Min länger aufbleiben","Stay up 30 min longer","Se coucher 30 min plus tard","Andare a letto 30 min più tardi","Acostarse 30 min más tarde","Pójść spać 30 min później"],
+rwName:["Name der Belohnung","Reward name","Nom de la récompense","Nome del premio","Nombre de la recompensa","Nazwa nagrody"],
+rwPrice:["Preis in Münzen","Price in coins","Prix en pièces","Prezzo in monete","Precio en monedas","Cena w monetach"],
+add:["Hinzufügen","Add","Ajouter","Aggiungi","Añadir","Dodaj"],
+redeemed:["Eingelöst: {0}","Redeemed: {0}","Échangé : {0}","Riscattato: {0}","Canjeado: {0}","Odebrano: {0}"],
+tip:["Tipp des Tages","Tip of the day","Astuce du jour","Consiglio del giorno","Consejo del día","Wskazówka dnia"],
+tipMore:["Noch ein Tipp","Another tip","Une autre astuce","Un altro consiglio","Otro consejo","Jeszcze jedna"],
+tipRead:["Gelesen: +5 XP","Read: +5 XP","Lu : +5 XP","Letto: +5 XP","Leído: +5 XP","Przeczytane: +5 XP"],
+tipDone:["Gelesen ✓","Read ✓","Lu ✓","Letto ✓","Leído ✓","Przeczytane ✓"],
+jokeT:["Flachwitz des Tages","Joke of the day","Blague du jour","Barzelletta del giorno","Chiste del día","Dowcip dnia"],
+jokeX:["Extra-Belohnung: Flachwitz des Tages","Bonus reward: Joke of the day","Récompense bonus : blague du jour","Premio extra: barzelletta del giorno","Recompensa extra: chiste del día","Dodatkowa nagroda: dowcip dnia"],
+punch:["Pointe zeigen","Show punchline","Montrer la chute","Mostra la battuta","Mostrar el remate","Pokaż puentę"],
+punch2:["Pointe ansehen","View punchline","Voir la chute","Vedi la battuta","Ver el remate","Zobacz puentę"],
+jokeLock:["🔒 Noch {0} erledigte Aufgaben, dann gibt es einen Extra-Witz.","🔒 {0} more completed tasks, then you get a bonus joke.","🔒 Encore {0} tâches terminées, puis une blague bonus.","🔒 Ancora {0} compiti completati, poi arriva una barzelletta extra.","🔒 {0} tareas más completadas y llega un chiste extra.","🔒 Jeszcze {0} wykonanych zadań, a dostaniesz dodatkowy dowcip."],
+profile:["Mein Profil","My profile","Mon profil","Il mio profilo","Mi perfil","Mój profil"],
+pName:["Name","Name","Prénom","Nome","Nombre","Imię"],
+pickPhoto:["Foto wählen","Choose photo","Choisir une photo","Scegli foto","Elegir foto","Wybierz zdjęcie"],
+usePhoto:["Foto verwenden","Use photo","Utiliser la photo","Usa foto","Usar foto","Użyj zdjęcia"],
+rmPhoto:["Foto entfernen","Remove photo","Supprimer la photo","Rimuovi foto","Quitar foto","Usuń zdjęcie"],
+pinTitle:["Eltern-PIN","Parent PIN","Code PIN parents","PIN genitori","PIN de los padres","PIN rodziców"],
+pinEnter:["Bitte PIN eingeben","Please enter PIN","Entre le code PIN","Inserisci il PIN","Introduce el PIN","Wpisz PIN"],
+wrongPin:["Falsche PIN","Wrong PIN","Code PIN incorrect","PIN errato","PIN incorrecto","Zły PIN"],
+pinSetLbl:["Eltern-PIN (4 Ziffern)","Parent PIN (4 digits)","PIN parents (4 chiffres)","PIN genitori (4 cifre)","PIN de los padres (4 dígitos)","PIN rodziców (4 cyfry)"],
+pinSet:["PIN festlegen","Set PIN","Définir le PIN","Imposta PIN","Crear PIN","Ustaw PIN"],
+pinDel:["PIN entfernen","Remove PIN","Supprimer le PIN","Rimuovi PIN","Quitar PIN","Usuń PIN"],
+pinNeed:["Bitte genau 4 Ziffern eingeben","Please enter exactly 4 digits","Entre exactement 4 chiffres","Inserisci esattamente 4 cifre","Introduce exactamente 4 dígitos","Wpisz dokładnie 4 cyfry"],
+pinOn:["PIN ist aktiv","PIN is active","Le PIN est actif","Il PIN è attivo","El PIN está activo","PIN jest aktywny"],
+reset:["Alles zurücksetzen","Reset everything","Tout réinitialiser","Reimposta tutto","Restablecer todo","Zresetuj wszystko"],
+parentArea:["Eltern-Bereich","Parent area","Espace parents","Area genitori","Zona de padres","Strefa rodziców"],
+payT:["Kleine Belohnung 🎁","Small reward 🎁","Petite récompense 🎁","Piccolo premio 🎁","Pequeña recompensa 🎁","Mała nagroda 🎁"],
+payTxt:["Gefällt dir die App, lass gern eine kleine Belohnung da. Dankeschön.","If you like the app, feel free to leave a small reward. Thank you.","Si l'appli te plaît, laisse volontiers une petite récompense. Merci.","Se l'app ti piace, lascia pure un piccolo premio. Grazie.","Si te gusta la app, deja una pequeña recompensa. Gracias.","Jeśli podoba Ci się aplikacja, zostaw małą nagrodę. Dziękuję."],
+payAsk:["Frage bitte Deine Eltern vorher, ob das okay ist.","Please ask your parents first if that's okay.","Demande d'abord à tes parents si c'est d'accord.","Chiedi prima ai tuoi genitori se va bene.","Pregunta antes a tus padres si les parece bien.","Zapytaj najpierw rodziców, czy to w porządku."],
+amount:["Eigener Betrag in €","Your own amount in €","Montant libre en €","Importo a scelta in €","Importe propio en €","Własna kwota w €"],
+amtPh:["z. B. 2,50","e.g. 2.50","p. ex. 2,50","ad es. 2,50","p. ej. 2,50","np. 2,50"],
+amtGo:["Belohnung senden","Send reward","Envoyer la récompense","Invia il premio","Enviar recompensa","Wyślij nagrodę"],
+amtNeed:["Bitte einen Betrag eingeben","Please enter an amount","Merci d'entrer un montant","Inserisci un importo","Introduce un importe","Wpisz kwotę"],
+toastXp:["+{0} XP","+{0} XP","+{0} XP","+{0} XP","+{0} XP","+{0} XP"],
+toastLvl:["Level {0} erreicht!","Level {0} reached!","Niveau {0} atteint !","Livello {0} raggiunto!","¡Nivel {0} alcanzado!","Poziom {0} osiągnięty!"],
+toastBadge:["Neues Abzeichen: {0}","New badge: {0}","Nouveau badge : {0}","Nuovo badge: {0}","Nueva insignia: {0}","Nowa odznaka: {0}"],
+skinBought:["Skin freigeschaltet!","Skin unlocked!","Skin débloqué !","Skin sbloccato!","¡Skin desbloqueado!","Skin odblokowany!"],
+vicT:["QUEST-SIEG!","QUEST VICTORY!","VICTOIRE !","QUEST VINTA!","¡MISIÓN CUMPLIDA!","ZWYCIĘSTWO!"],
+vicS:["Alles geschafft","All done","Tout est fait","Tutto fatto","Todo hecho","Wszystko zrobione"],
+aLang:["Sprache","Language","Langue","Lingua","Idioma","Język"],
+aSnd:["Ton an/aus","Sound on/off","Son activé/désactivé","Audio acceso/spento","Sonido activado/desactivado","Dźwięk wł./wył."],
+aAv:["Profil öffnen","Open profile","Ouvrir le profil","Apri il profilo","Abrir perfil","Otwórz profil"],
+aChk:["Erledigt","Done","Terminé","Fatto","Hecho","Zrobione"],
+aPin:["Eltern-Bestätigung ein/aus","Parent approval on/off","Validation parents oui/non","Conferma genitori sì/no","Aprobación de padres sí/no","Zatwierdzenie rodziców wł./wył."],
+loginT:["Anmelden","Log in","Connexion","Accedi","Iniciar sesión","Zaloguj się"],
+regT:["Konto erstellen","Create account","Créer un compte","Crea account","Crear cuenta","Utwórz konto"],
+user:["Benutzername","Username","Nom d'utilisateur","Nome utente","Usuario","Nazwa użytkownika"],
+pass:["Passwort","Password","Mot de passe","Password","Contraseña","Hasło"],
+loginBtn:["Anmelden","Log in","Se connecter","Accedi","Entrar","Zaloguj"],
+regBtn:["Konto erstellen","Create account","Créer le compte","Crea account","Crear cuenta","Utwórz konto"],
+toReg:["Neu hier? Konto erstellen","New here? Create account","Nouveau ? Créer un compte","Nuovo? Crea un account","¿Nuevo? Crear cuenta","Nowy? Utwórz konto"],
+toLogin:["Schon ein Konto? Anmelden","Already have an account? Log in","Déjà un compte ? Se connecter","Hai già un account? Accedi","¿Ya tienes cuenta? Entra","Masz konto? Zaloguj się"],
+logout:["Abmelden","Log out","Se déconnecter","Esci","Cerrar sesión","Wyloguj"],
+errLogin:["Benutzername oder Passwort falsch","Wrong username or password","Nom d'utilisateur ou mot de passe incorrect","Nome utente o password errati","Usuario o contraseña incorrectos","Zła nazwa użytkownika lub hasło"],
+errTaken:["Benutzername ist schon vergeben","Username is already taken","Ce nom d'utilisateur est déjà pris","Nome utente già in uso","El usuario ya existe","Ta nazwa jest już zajęta"],
+errUser:["Benutzername: 3 bis 20 Zeichen (Buchstaben, Zahlen, _ und -)","Username: 3 to 20 characters (letters, numbers, _ and -)","Nom d'utilisateur : 3 à 20 caractères (lettres, chiffres, _ et -)","Nome utente: da 3 a 20 caratteri (lettere, numeri, _ e -)","Usuario: de 3 a 20 caracteres (letras, números, _ y -)","Nazwa: 3 do 20 znaków (litery, cyfry, _ i -)"],
+errPass:["Passwort: mindestens 8 Zeichen","Password: at least 8 characters","Mot de passe : au moins 8 caractères","Password: almeno 8 caratteri","Contraseña: mínimo 8 caracteres","Hasło: co najmniej 8 znaków"],
+errRate:["Zu viele Versuche. Bitte warte ein paar Minuten.","Too many attempts. Please wait a few minutes.","Trop de tentatives. Attends quelques minutes.","Troppi tentativi. Aspetta qualche minuto.","Demasiados intentos. Espera unos minutos.","Za dużo prób. Poczekaj kilka minut."],
+errNet:["Keine Verbindung zum Server","Cannot reach the server","Serveur injoignable","Impossibile raggiungere il server","No se puede conectar con el servidor","Brak połączenia z serwerem"],
+errClosed:["Neue Konten sind gerade nicht möglich","New accounts are currently closed","Les nouvelles inscriptions sont fermées","Le nuove registrazioni sono chiuse","Las altas de cuentas están cerradas","Rejestracja nowych kont jest zamknięta"],
+admT:["Admin","Admin","Admin","Admin","Admin","Admin"],
+admUsers:["Benutzer","Users","Utilisateurs","Utenti","Usuarios","Użytkownicy"],
+admRegOn:["Registrierung offen – tippen zum Schließen","Registration open – tap to close","Inscription ouverte – touche pour fermer","Registrazione aperta – tocca per chiudere","Registro abierto – toca para cerrar","Rejestracja otwarta – dotknij, by zamknąć"],
+admRegOff:["Registrierung geschlossen – tippen zum Öffnen","Registration closed – tap to open","Inscription fermée – touche pour ouvrir","Registrazione chiusa – tocca per aprire","Registro cerrado – toca para abrir","Rejestracja zamknięta – dotknij, by otworzyć"],
+admPw:["Neues Passwort setzen","Set new password","Définir un nouveau mot de passe","Imposta nuova password","Establecer nueva contraseña","Ustaw nowe hasło"],
+admDone:["Passwort geändert","Password changed","Mot de passe modifié","Password cambiata","Contraseña cambiada","Hasło zmienione"],
+mustT:["Neues Passwort festlegen","Set a new password","Définir un nouveau mot de passe","Imposta una nuova password","Establece una nueva contraseña","Ustaw nowe hasło"],
+mustTxt:["Bitte lege jetzt ein eigenes Passwort fest, bevor du die App benutzt.","Please choose your own password before you use the app.","Choisis ton propre mot de passe avant d'utiliser l'appli.","Scegli la tua password prima di usare l'app.","Elige tu propia contraseña antes de usar la app.","Ustaw własne hasło, zanim zaczniesz korzystać z aplikacji."],
+pwOld:["Aktuelles Passwort","Current password","Mot de passe actuel","Password attuale","Contraseña actual","Obecne hasło"],
+pwNew:["Neues Passwort","New password","Nouveau mot de passe","Nuova password","Nueva contraseña","Nowe hasło"],
+pwRep:["Neues Passwort wiederholen","Repeat new password","Répéter le nouveau mot de passe","Ripeti la nuova password","Repite la nueva contraseña","Powtórz nowe hasło"],
+pwMismatch:["Die Passwörter stimmen nicht überein","The passwords don't match","Les mots de passe ne correspondent pas","Le password non coincidono","Las contraseñas no coinciden","Hasła nie są takie same"],
+pwSame:["Das neue Passwort muss anders sein","The new password must be different","Le nouveau mot de passe doit être différent","La nuova password deve essere diversa","La nueva contraseña debe ser diferente","Nowe hasło musi być inne"],
+pwBad:["Aktuelles Passwort ist falsch","Current password is wrong","Le mot de passe actuel est incorrect","La password attuale è errata","La contraseña actual es incorrecta","Obecne hasło jest błędne"],
+pwChange:["Passwort ändern","Change password","Changer le mot de passe","Cambia password","Cambiar contraseña","Zmień hasło"],
+roleLbl:["Ich bin …","I am …","Je suis…","Sono…","Soy…","Jestem…"],
+roleChild:["🧒 Kind","🧒 Child","🧒 Enfant","🧒 Bambino","🧒 Niño/a","🧒 Dziecko"],
+roleAdult:["🧑 Erwachsener","🧑 Adult","🧑 Adulte","🧑 Adulto","🧑 Adulto","🧑 Dorosły"],
+famT:["Familie","Family","Famille","Famiglia","Familia","Rodzina"],
+famChildren:["Kinder-Konten","Child accounts","Comptes enfants","Account bambini","Cuentas de niños","Konta dzieci"],
+famAdd:["Kinder-Konto anlegen","Create child account","Créer un compte enfant","Crea account bambino","Crear cuenta de niño","Utwórz konto dziecka"],
+famNone:["Noch keine Kinder-Konten.","No child accounts yet.","Pas encore de compte enfant.","Ancora nessun account bambino.","Aún no hay cuentas de niños.","Brak kont dzieci."],
+famLimit:["Maximal 10 Kinder-Konten","At most 10 child accounts","10 comptes enfants maximum","Massimo 10 account bambini","Máximo 10 cuentas de niños","Maksymalnie 10 kont dzieci"],
+nav_acct:["Konto","Account","Compte","Account","Cuenta","Konto"],
+acctAs:["Angemeldet als","Signed in as","Connecté en tant que","Accesso come","Sesión iniciada como","Zalogowano jako"],
+settings:["Einstellungen","Settings","Paramètres","Impostazioni","Ajustes","Ustawienia"],
+sndT:["Ton","Sound","Son","Audio","Sonido","Dźwięk"],
+sndOn:["An","On","Activé","Acceso","Activado","Wł."],
+sndOff:["Aus","Off","Désactivé","Spento","Desactivado","Wył."],
+charEdit:["Charakter anpassen","Customize character","Personnaliser le personnage","Personalizza personaggio","Personalizar personaje","Dostosuj postać"],
+charSkin:["Figur","Character","Personnage","Personaggio","Personaje","Postać"],
+charBg:["Hintergrundfarbe","Background color","Couleur de fond","Colore di sfondo","Color de fondo","Kolor tła"],
+charAcc:["Zubehör","Accessory","Accessoire","Accessorio","Accesorio","Dodatek"]
+};
+
+/* ===== Tipps ===== */
+const TE=["⏱️","🎒","📵","🧩","⏲️","🏃","👯","🧠","📍","⏰","💧","🍳","😴","🎧","🐸","🎮","✅","🪥","🙋","🎯","🧹","📅","🎁","💪","☀️","💶","📚","🔕","🌬️","📝","⌛","🍎","👥"];
+const TIPS={
+de:[["2-Minuten-Start","Fang nur 2 Minuten an. Danach geht es meist von allein weiter."],["Rucksack am Vorabend","Pack deine Tasche schon abends. Morgens bleibt mehr Ruhe."],["Handy außer Sichtweite","Leg das Handy beim Lernen in ein anderes Zimmer."],["Große Aufgaben zerlegen","Teile eine große Aufgabe in kleine Schritte und hake jeden einzeln ab."],["15-5-Methode","15 Minuten arbeiten, 5 Minuten Pause. Stell dir einen Timer."],["Bewegungspause","Hüpf 20 Mal oder lauf eine Runde. Danach kannst du dich besser konzentrieren."],["Body Doubling","Lerne zusammen mit jemandem im selben Raum. Das hilft beim Dranbleiben."],["Brain Dump","Schreib alles auf, was dir im Kopf herumschwirrt. Dann ist wieder Platz zum Denken."],["Fester Platz für Dinge","Gib Schlüssel, Handy und Kopfhörer einen festen Platz. So suchst du nie wieder."],["Zwei Wecker","Stell zwei Wecker, einen davon weit weg vom Bett."],["Wasser zuerst","Trink morgens als Erstes ein Glas Wasser."],["Frühstück mit Eiweiß","Ei, Joghurt oder Quark halten länger satt als nur Süßes."],["Schlaf","Geh möglichst immer zur gleichen Zeit ins Bett. Ausgeschlafen fällt alles leichter."],["Musik ohne Text","Instrumentale Musik stört beim Lernen weniger als Songs mit Text."],["Schwerstes zuerst","Mach die unangenehmste Aufgabe zuerst. Danach wird der Rest leicht."],["Zocken mit Plan","Leg vorher fest, wie lange du zockst, und stell einen Timer."],["Checkliste für die Routine","Schreib deine Morgenroutine als Liste und häng sie sichtbar auf."],["Hygiene-Routine","Koppel Zähneputzen und Duschen an feste Zeiten, zum Beispiel direkt nach dem Aufstehen."],["Hilfe holen","Wenn du nicht weiterkommst, frag früh nach. Das ist stark, nicht peinlich."],["Nur eine Sache","Mach immer nur eine Sache auf einmal. Multitasking klappt kaum."],["5-Minuten-Aufräumen","Stell einen Timer auf 5 Minuten und räum dein Zimmer auf, so viel du schaffst."],["Wochenplan am Sonntag","Schau sonntags auf die kommende Woche und trag alles in die App ein."],["Belohnung einplanen","Such dir vorher eine kleine Belohnung für nach der Aufgabe aus."],["Fehler sind okay","Fehler gehören zum Lernen. Mach einfach weiter."],["Tageslicht","Geh am Tag kurz raus. Licht macht wach."],["Taschengeld","Teile dein Taschengeld gleich beim Erhalten in Sparen und Ausgeben auf."],["Vokabeln in Häppchen","Lerne lieber täglich 5 Minuten als einmal eine Stunde."],["Benachrichtigungen aus","Schalte Push-Meldungen beim Lernen aus."],["Atemübung","Atme 4 Sekunden ein, halte kurz und atme 6 Sekunden aus. Das beruhigt."],["Klebezettel","Schreib Wichtiges auf einen Zettel und klebe ihn an die Tür oder den Spiegel."],["Zeit schätzen","Schätze vorher, wie lange eine Aufgabe dauert, und vergleiche danach."],["Snack-Vorrat","Halte einen gesunden Snack bereit, zum Beispiel Obst oder Nüsse."],["Gemeinsam lernen","Verabrede dich mit einem Freund zum Lernen. Zu zweit macht es mehr Spaß."]],
+en:[["2-Minute Start","Just start for 2 minutes. Usually you keep going on your own."],["Pack the night before","Pack your bag in the evening. Mornings get calmer."],["Phone out of sight","Put your phone in another room while you study."],["Break big tasks down","Split a big task into small steps and tick them off one by one."],["15-5 method","Work 15 minutes, rest 5. Set a timer."],["Movement break","Do 20 jumps or walk a lap. Then focus comes easier."],["Body doubling","Study in the same room as someone else. It helps you stay on track."],["Brain dump","Write down everything buzzing in your head. Then there's room to think."],["A fixed spot","Give keys, phone and headphones a fixed spot. No more searching."],["Two alarms","Set two alarms, one of them far from your bed."],["Water first","Drink a glass of water first thing in the morning."],["Protein breakfast","Eggs, yogurt or quark keep you full longer than sweets."],["Sleep","Go to bed at the same time when you can. Everything is easier when rested."],["Music without lyrics","Instrumental music distracts less than songs with lyrics."],["Hardest first","Do the most unpleasant task first. The rest feels easy."],["Gaming with a plan","Decide beforehand how long you'll play and set a timer."]],
+fr:[["Démarrage en 2 minutes","Commence juste 2 minutes. Ensuite, ça roule souvent tout seul."],["Sac prêt la veille","Prépare ton sac le soir. Le matin sera plus calme."],["Téléphone hors de vue","Mets ton téléphone dans une autre pièce quand tu travailles."],["Découpe les grosses tâches","Divise une grosse tâche en petites étapes et coche-les une par une."],["Méthode 15-5","Travaille 15 minutes, pause de 5. Mets un minuteur."],["Pause bougeotte","Fais 20 sauts ou un tour dehors. Ensuite, tu te concentres mieux."],["Travailler à deux","Travaille dans la même pièce que quelqu'un. Ça aide à tenir."],["Vide ta tête","Note tout ce qui te trotte dans la tête. Ça libère de la place."],["Une place fixe","Donne une place fixe aux clés, au téléphone et au casque. Plus besoin de chercher."],["Deux réveils","Mets deux réveils, dont un loin du lit."],["D'abord de l'eau","Bois un verre d'eau dès le réveil."],["Petit-déj protéiné","Œuf, yaourt ou fromage blanc calent plus longtemps que le sucré."],["Sommeil","Couche-toi à la même heure si possible. Reposé, tout est plus facile."],["Musique sans paroles","La musique instrumentale distrait moins que les chansons avec paroles."],["Le plus dur d'abord","Fais d'abord la tâche la plus pénible. Le reste paraît facile."],["Jouer avec un plan","Décide avant combien de temps tu joues et mets un minuteur."]],
+it:[["Via in 2 minuti","Inizia solo per 2 minuti. Poi di solito si va avanti da soli."],["Zaino la sera prima","Prepara lo zaino la sera. La mattina sarà più tranquilla."],["Telefono lontano","Metti il telefono in un'altra stanza mentre studi."],["Spezza i compiti grandi","Dividi un compito grande in piccoli passi e spunta ognuno."],["Metodo 15-5","Lavora 15 minuti, riposa 5. Imposta un timer."],["Pausa di movimento","Fai 20 salti o un giro a piedi. Poi ti concentri meglio."],["Studiare in compagnia","Studia nella stessa stanza di qualcuno. Aiuta a non mollare."],["Svuota la testa","Scrivi tutto ciò che hai in testa. Così torna spazio per pensare."],["Un posto fisso","Dai a chiavi, telefono e cuffie un posto fisso. Niente più ricerche."],["Due sveglie","Imposta due sveglie, una lontana dal letto."],["Prima l'acqua","Bevi un bicchiere d'acqua appena sveglio."],["Colazione con proteine","Uova, yogurt o ricotta saziano più a lungo dei dolci."],["Sonno","Vai a letto sempre alla stessa ora, se puoi. Riposato è tutto più facile."],["Musica senza testo","La musica strumentale distrae meno delle canzoni con testo."],["Prima il più difficile","Fai prima il compito più pesante. Il resto sembra facile."],["Giocare con un piano","Decidi prima quanto giochi e imposta un timer."]],
+es:[["Arranque de 2 minutos","Empieza solo 2 minutos. Después casi siempre sigues solo."],["Mochila la noche anterior","Prepara la mochila por la noche. La mañana será más tranquila."],["Móvil fuera de la vista","Deja el móvil en otra habitación mientras estudias."],["Divide las tareas grandes","Parte una tarea grande en pasos pequeños y táchalos uno a uno."],["Método 15-5","Trabaja 15 minutos y descansa 5. Pon un temporizador."],["Pausa de movimiento","Haz 20 saltos o da una vuelta. Luego te concentras mejor."],["Estudiar acompañado","Estudia en la misma habitación que otra persona. Ayuda a seguir."],["Vacía la cabeza","Escribe todo lo que te da vueltas. Así vuelve a haber espacio para pensar."],["Un sitio fijo","Da un sitio fijo a las llaves, el móvil y los auriculares. Adiós a buscar."],["Dos alarmas","Pon dos alarmas, una lejos de la cama."],["Primero agua","Bebe un vaso de agua nada más levantarte."],["Desayuno con proteína","Huevo, yogur o requesón sacian más que lo dulce."],["Sueño","Acuéstate siempre a la misma hora si puedes. Descansado todo es más fácil."],["Música sin letra","La música instrumental distrae menos que las canciones con letra."],["Lo difícil primero","Haz primero la tarea más pesada. Lo demás parece fácil."],["Jugar con un plan","Decide antes cuánto vas a jugar y pon un temporizador."]],
+pl:[["Start na 2 minuty","Zacznij tylko na 2 minuty. Potem zwykle idzie już samo."],["Plecak dzień wcześniej","Spakuj plecak wieczorem. Rano będzie spokojniej."],["Telefon z dala","Podczas nauki zostaw telefon w innym pokoju."],["Dziel duże zadania","Podziel duże zadanie na małe kroki i odhaczaj je po kolei."],["Metoda 15-5","Pracuj 15 minut, odpoczywaj 5. Nastaw minutnik."],["Przerwa na ruch","Zrób 20 podskoków albo spacer. Potem łatwiej się skupić."],["Nauka we dwoje","Ucz się w tym samym pokoju co ktoś inny. Łatwiej wytrwać."],["Wypisz wszystko","Zapisz wszystko, co kłębi się w głowie. Zrobi się miejsce na myślenie."],["Stałe miejsce","Wyznacz stałe miejsce na klucze, telefon i słuchawki. Koniec szukania."],["Dwa budziki","Nastaw dwa budziki, jeden z dala od łóżka."],["Najpierw woda","Rano od razu wypij szklankę wody."],["Śniadanie z białkiem","Jajko, jogurt lub twaróg sycą dłużej niż słodycze."],["Sen","Kładź się spać o stałej porze, jeśli możesz. Po dobrym śnie wszystko jest łatwiejsze."],["Muzyka bez słów","Muzyka instrumentalna rozprasza mniej niż piosenki ze słowami."],["Najtrudniejsze pierwsze","Zrób najpierw najmniej przyjemne zadanie. Reszta wydaje się łatwa."],["Gra z planem","Ustal wcześniej, ile pograsz, i nastaw minutnik."]]
+};
+
+/* ===== Witze [Frage, Pointe] ===== */
+const JOKES={
+de:[["Was sagt der große Stift zum kleinen Stift?","Wachs mal, Stift!"],["Warum können Geister so schlecht lügen?","Weil man durch sie hindurchsehen kann."],["Was ist grün und klopft an die Tür?","Ein Klopfsalat."],["Was steht auf dem Grabstein eines Mathematikers?","Damit hat er nicht gerechnet."],["Was ist ein Keks unter einem Baum?","Ein schattiges Plätzchen."],["Was sagt der Ozean zum Strand?","Nichts, er winkt nur."],["Was ist rot und schlecht für die Zähne?","Ein Ziegelstein."],["Warum war der Computer so müde?","Er hatte zu viele Tabs offen."],["Was ist grün, hat vier Beine und fällt vom Baum?","Ein Billardtisch."],["Was sagt die Null zur Acht?","Schicker Gürtel!"],["Was ist gelb und kann nicht schwimmen?","Ein Bagger."],["Was sagt der große Magnet zum kleinen?","Ich find dich anziehend."],["Warum ist die Banane krumm?","Weil im Dschungel keiner die Richtung kannte."],["Was ist ein Schneemann im Mai?","Eine Pfütze."],["Was liegt am Strand und spricht undeutlich?","Eine Nuschel."],["Was ist schwarz-weiß und rollt den Berg hinunter?","Ein Pinguin, der es eilig hat."],["Was ist das Lieblingsgetränk von Vampiren?","Blutorangensaft."],["Was sagt eine Gitarre, wenn sie traurig ist?","Ich bin verstimmt."],["Wie nennt man einen Bumerang, der nicht zurückkommt?","Stock."],["Was macht ein Pirat am Computer?","Er drückt die Enter-Taste."]],
+en:[["Why did the scarecrow win an award?","Because he was outstanding in his field."],["What do you call a fake noodle?","An impasta."],["Why can't you trust stairs?","They're always up to something."],["What do you call cheese that isn't yours?","Nacho cheese."],["Why was the math book sad?","It had too many problems."],["What do you call a bear with no teeth?","A gummy bear."],["Why do bees have sticky hair?","Because they use honeycombs."],["What's a ghost's favorite fruit?","Boo-berries."]],
+fr:[["Quel est le comble pour un électricien ?","De ne pas être au courant."],["Pourquoi les poissons détestent-ils l'ordinateur ?","Parce qu'ils ont peur du net."],["Qu'est-ce qui est jaune et qui attend ?","Jonathan."],["Quel est le comble pour un jardinier ?","De raconter des salades."],["Pourquoi les plongeurs plongent-ils toujours en arrière ?","Parce que sinon ils tombent dans le bateau."],["Que fait une fraise sur un cheval ?","Tagada tagada !"],["Que dit un escargot quand il croise une limace ?","Regarde, un nudiste !"],["Comment appelle-t-on un chien sans pattes ?","On ne l'appelle pas, on va le chercher."]],
+it:[["Qual è il colmo per un pescatore?","Perdere il filo del discorso."],["Qual è il colmo per un orologiaio?","Non avere tempo."],["Perché i pomodori arrossiscono?","Perché vedono l'insalata nuda."],["Qual è il colmo per un cuoco?","Perdere la pasta."],["Cosa dice un muro a un altro muro?","Ci vediamo all'angolo."],["Perché il libro di matematica è triste?","Perché ha troppi problemi."],["Che cos'è che ha un dente ma non morde?","Il pettine."],["Come si chiama un cane che non ha zampe?","Non importa, tanto non viene."]],
+es:[["¿Qué le dice un jardinero a otro?","Disfrutemos mientras podamos."],["¿Qué hace una abeja en el gimnasio?","¡Zum-ba!"],["¿Por qué los pájaros vuelan hacia el sur?","Porque caminando tardarían demasiado."],["¿Cuál es el colmo de un electricista?","Que su mujer se llame Luz y sus hijos le sigan la corriente."],["¿Qué le dice un cero a otro cero?","No valemos nada."],["¿Cómo se despiden los químicos?","Ácido un placer."],["¿Qué hace un pez en el agua?","Nada."],["¿Por qué el libro de mates está triste?","Porque tiene muchos problemas."]],
+pl:[["Dlaczego komputer poszedł do lekarza?","Bo złapał wirusa."],["Co mówi ocean do plaży?","Nic, tylko macha."],["Dlaczego pomidor się zaczerwienił?","Bo zobaczył sałatkę bez ubrania."],["Dokąd jedzie krowa na wycieczkę?","Do mu-zeum."],["Co mówi zero do ósemki?","Ładny pasek!"],["Dlaczego książka do matematyki jest smutna?","Bo ma za dużo zadań."],["Co mówi lodówka do mrożonki?","Chłodno cię witam."],["Dlaczego koty lubią internet?","Bo mogą złapać myszkę."]]
+};
+
+/* ===== Hilfsfunktionen ===== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let S;
+const LI=()=>Math.max(0,LANGS.findIndex(l=>l[0]===S.lang));
+const t=(k,...a)=>{const e=K[k];const s=e?(e[LI()]||e[0]):k;return s.replace(/\{(\d)\}/g,(m,i)=>a[i]!==undefined?a[i]:"")};
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const pd=s=>{const p=s.split("-").map(Number);return new Date(p[0],p[1]-1,p[2])};
+const todayS=()=>ymd(new Date());
+const addD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ymd(d)};
+const dim=(y,m)=>new Date(y,m+1,0).getDate();
+const dayNum=s=>{const p=s.split("-").map(Number);return Math.floor(Date.UTC(p[0],p[1]-1,p[2])/864e5)};
+const appName=()=>S.lang==="de"?"TagesBoss":"QuestBoss";
+const lvl=()=>Math.floor(S.xp/100)+1;
+function fmtDate(s){const d=pd(s),w=WD[S.lang][d.getDay()],m=MO[S.lang][d.getMonth()],n=d.getDate();
+ if(S.lang==="en")return w+", "+m+" "+n;if(S.lang==="de"||S.lang==="pl")return w+" "+n+". "+m;return w+" "+n+" "+m}
+function def(){return{lang:"en",bg:"",acc:"",sound:true,xp:0,coins:0,name:"",photo:"",usePhoto:false,skin:"🧟",owned:["🧟"],items:[],done:{},pend:{},act:{},rewards:[{id:"r1",k:"rw1",c:150},{id:"r2",k:"rw2",c:100},{id:"r3",k:"rw3",c:250}],pin:"",best:0,badges:[],tipSeen:{},tipN:0,vic:{},jokeOpen:{}}}
+let USER=null,saveT=null,dirty=false,LM="login",ADMIN=false,ADM={users:[],allow:true},ROLE="adult",MUST=false,RL="child",FAM={children:[]};
+function load(){S=def();try{const l=localStorage.getItem("qb.lang");if(l&&LANGS.some(x=>x[0]===l))S.lang=l}catch(e){}}
+function save(){try{localStorage.setItem("qb.lang",S.lang)}catch(e){}if(!USER)return;dirty=true;clearTimeout(saveT);saveT=setTimeout(push,600)}
+async function push(keep){if(!USER||!dirty||MUST)return;dirty=false;
+ try{const r=await fetch("/api/state",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(S),keepalive:!!keep});
+  if(r.status===401){USER=null;render();return}if(!r.ok)throw 0}
+ catch(e){dirty=true;clearTimeout(saveT);saveT=setTimeout(push,5000)}}
+async function api(p,m,b){const r=await fetch(p,{method:m||"GET",headers:b?{"Content-Type":"application/json"}:{},body:b?JSON.stringify(b):undefined});let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}}
+
+/* ===== Aufgaben-Logik ===== */
+function due(it,d){
+ if(it.rec==="once")return it.date===d;
+ if(d<it.date)return false;
+ const x=pd(d);
+ if(it.rec==="daily")return true;
+ if(it.rec==="weekly")return(it.days||[]).includes(x.getDay());
+ if(it.rec==="monthly")return x.getDate()===Math.min(it.dom,dim(x.getFullYear(),x.getMonth()));
+ return false}
+const dueList=d=>S.items.filter(i=>due(i,d)).sort((a,b)=>(a.time||"99:99").localeCompare(b.time||"99:99"));
+const isDone=(it,d)=>it.rec==="once"?!!it.doneOn:(S.done[d]||[]).includes(it.id);
+const isPend=(it,d)=>it.rec==="once"?!!it.pendOn:(S.pend[d]||[]).includes(it.id);
+function setDone(it,d,v){if(it.rec==="once"){it.doneOn=v?d:null;return}
+ const a=S.done[d]||(S.done[d]=[]);const i=a.indexOf(it.id);if(v&&i<0)a.push(it.id);if(!v&&i>=0)a.splice(i,1)}
+function setPend(it,d,v){if(it.rec==="once"){it.pendOn=v?d:null;return}
+ const a=S.pend[d]||(S.pend[d]=[]);const i=a.indexOf(it.id);if(v&&i<0)a.push(it.id);if(!v&&i>=0)a.splice(i,1)}
+const doneDate=(it,d)=>it.rec==="once"?it.doneOn:d;
+const rewName=r=>r.k?t(r.k):r.n;
+function streak(){const td=todayS();let d=(S.act[td]>0)?td:addD(td,-1);let n=0;while(S.act[d]>0){n++;d=addD(d,-1)}return n}
+function waitingList(){const td=todayS(),out=[];
+ S.items.forEach(it=>{if(it.rec==="once"&&it.pendOn&&it.pendOn<td&&!it.doneOn)out.push({it,d:it.pendOn})});
+ Object.keys(S.pend).forEach(d=>{if(d<td)(S.pend[d]||[]).forEach(id=>{const it=S.items.find(x=>x.id===id);if(it&&it.rec!=="once")out.push({it,d})})});
+ return out.sort((a,b)=>a.d.localeCompare(b.d))}
+
+/* ===== Sound ===== */
+let AC=null;
+function ac(){if(!S.sound)return null;try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC}catch(e){return null}}
+function tone(f,d,type,v,at,f2){const c=ac();if(!c)return;try{const t0=c.currentTime+(at||0),o=c.createOscillator(),g=c.createGain();o.type=type||"square";o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+d);g.gain.setValueAtTime(v||.08,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+.03)}catch(e){}}
+function noise(d,v,at,fq){const c=ac();if(!c)return;try{const n=Math.floor(c.sampleRate*d),b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type="bandpass";f.frequency.value=fq||1000;const g=c.createGain(),t0=c.currentTime+(at||0);g.gain.setValueAtTime(v||.1,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);s.connect(f);f.connect(g);g.connect(c.destination);s.start(t0)}catch(e){}}
+const sfx={
+ orb(){const r=.8+Math.random()*.5;tone(700*r,.09,"sine",.12,0,1400*r);tone(1050*r,.12,"sine",.09,.07,1700*r)},
+ level(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.22,"square",.07,i*.1))},
+ fanfare(){[[392,0],[523,.14],[659,.28],[784,.42]].forEach(a=>tone(a[0],.2,"sawtooth",.07,a[1]));[523,659,784].forEach(f=>tone(f,.6,"square",.05,.6))},
+ badge(){tone(300,.6,"sawtooth",.05,0,2000);tone(600,.6,"sine",.07,.1,3000);tone(1500,.3,"triangle",.06,.55)},
+ chest(){noise(.3,.09,0,500);tone(220,.15,"square",.06,.15);[660,880,1320].forEach((f,i)=>tone(f,.25,"triangle",.09,.35+i*.1))},
+ undo(){tone(220,.18,"square",.08,0,110)},
+ ok(){tone(660,.08,"triangle",.1);tone(880,.1,"triangle",.1,.08)},
+ save(){tone(523,.08,"square",.07);tone(784,.12,"square",.07,.09)},
+ drum(){for(let i=0;i<7;i++)noise(.07,.12,i*.08,200+i*40);noise(.9,.12,.65,6000)}
+};
+
+/* ===== Effekte ===== */
+function toast(msg){const w=$("#toasts");const d=document.createElement("div");d.className="toast";d.textContent=msg;w.appendChild(d);setTimeout(()=>d.remove(),2300)}
+function orbs(el){if(RM||!el||!el.getBoundingClientRect)return;const bar=$("#xpbar");if(!bar)return;
+ const a=el.getBoundingClientRect(),b=bar.getBoundingClientRect();const sx=a.left+a.width/2-6,sy=a.top+a.height/2-6,tx=b.left+b.width/2-6,ty=b.top+b.height/2-6;
+ for(let i=0;i<6;i++){const o=document.createElement("div");o.className="orb";document.body.appendChild(o);
+  const mx=(sx+tx)/2+(Math.random()-.5)*120,my=Math.min(sy,ty)-30-Math.random()*60;
+  const an=o.animate([{transform:`translate(${sx}px,${sy}px) scale(1)`,opacity:1},{transform:`translate(${mx}px,${my}px) scale(1.2)`,opacity:1,offset:.45},{transform:`translate(${tx}px,${ty}px) scale(.4)`,opacity:.9}],{duration:750+Math.random()*300,delay:i*70,easing:"ease-in",fill:"backwards"});
+  an.onfinish=()=>o.remove()}}
+function confetti(n,cols){if(RM)return;cols=cols||["#19e3ff","#ff3df2","#5cd13a","#ffe14d","#fff"];
+ for(let i=0;i<n;i++){const p=document.createElement("div");p.className="conf";const sz=6+Math.random()*7;p.style.cssText=`width:${sz}px;height:${sz}px;background:${cols[i%cols.length]};left:${Math.random()*100}vw;top:-12px`;document.body.appendChild(p);
+  const dx=(Math.random()-.5)*160,an=p.animate([{transform:"translate(0,0) rotate(0)"},{transform:`translate(${dx}px,${window.innerHeight+30}px) rotate(${Math.random()*720}deg)`}],{duration:1600+Math.random()*1400,delay:Math.random()*300,easing:"cubic-bezier(.3,.6,.5,1)",fill:"backwards"});an.onfinish=()=>p.remove()}}
+function flash(){if(RM)return;const f=document.createElement("div");f.className="flash";document.body.appendChild(f);const a=f.animate([{opacity:0},{opacity:.75,offset:.25},{opacity:0}],{duration:600});a.onfinish=()=>f.remove()}
+function banner(){const b=document.createElement("div");b.className="vic";b.innerHTML=`<div class="vt">${t("vicT")}</div><div>${t("vicS")}</div>`;document.body.appendChild(b);sfx.fanfare();confetti(50);setTimeout(()=>b.remove(),3000)}
+function levelFx(){setTimeout(()=>toast(t("toastLvl",lvl())),350);sfx.level();flash();confetti(40)}
+function checkBadges(){const s=streak();S.best=Math.max(S.best,s);
+ BD.forEach(b=>{if(s>=b[0]&&!S.badges.includes(b[0])){S.badges.push(b[0]);setTimeout(()=>toast(t("toastBadge",b[1]+" "+t(b[2]))),700);sfx.badge();flash()}})}
+
+/* ===== Aktionen ===== */
+function gain(n,el){const l0=lvl();S.xp+=n;S.coins+=n;orbs(el);sfx.orb();toast(t("toastXp",n));if(lvl()>l0)levelFx();save();render()}
+function award(it,d,el){
+ const l0=lvl();S.xp+=it.xp;S.coins+=it.xp;S.act[d]=(S.act[d]||0)+1;
+ orbs(el);sfx.orb();toast(t("toastXp",it.xp));
+ if(lvl()>l0)levelFx();
+ checkBadges();
+ const td=todayS();
+ if(d===td){const l=dueList(td);if(l.length>=2&&l.every(i=>isDone(i,td))&&!S.vic[td]){S.vic[td]=1;setTimeout(banner,800)}}
+ save();render();
+ if(S.act[td]===3&&!S.jokeOpen[td])setTimeout(()=>openJoke(true),1500)}
+function undo(it,d){const dd=doneDate(it,d);setDone(it,d,false);S.xp=Math.max(0,S.xp-it.xp);S.coins=Math.max(0,S.coins-it.xp);S.act[dd]=Math.max(0,(S.act[dd]||0)-1);sfx.undo();save();render()}
+function toggle(it,d,el){
+ if(isDone(it,d)){const go=()=>undo(it,d);if(it.ap&&S.pin)pinAsk(go);else go()}
+ else if(isPend(it,d)){setPend(it,d,false);sfx.undo();save();render()}
+ else if(it.ap){setPend(it,d,true);sfx.ok();save();render()}
+ else{setDone(it,d,true);award(it,d,el)}}
+const guard=cb=>S.pin?pinAsk(cb):cb();
+function dbl(btn,fn){if(btn.dataset.armed){fn();return}btn.dataset.armed="1";const o=btn.textContent;btn.textContent=t("sure");setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent=o}},3000)}
+
+/* ===== Sheets ===== */
+function closeSheet(){document.querySelectorAll(".sbg").forEach(x=>x.remove())}
+function sheet(html){closeSheet();const bg=document.createElement("div");bg.className="sbg";bg.innerHTML=`<div class="sheet" role="dialog">${html}</div>`;bg.addEventListener("click",e=>{if(e.target===bg)closeSheet()});document.body.appendChild(bg);return bg.firstChild}
+function pinAsk(cb){
+ const s=sheet(`<h3>${t("pinTitle")}</h3><p>${t("pinEnter")}</p><input id="pinin" type="password" inputmode="numeric" maxlength="4" autocomplete="off"><div class="err" id="pinerr"></div><div class="btns"><button class="btn gh" data-a="close">${t("cancel")}</button><button class="btn" id="pinok">OK</button></div>`);
+ const inp=s.querySelector("#pinin");setTimeout(()=>inp.focus(),60);
+ const go=()=>{if(inp.value===S.pin){closeSheet();cb()}else{s.querySelector("#pinerr").textContent=t("wrongPin");inp.value="";sfx.undo()}};
+ s.querySelector("#pinok").onclick=go;inp.onkeydown=e=>{if(e.key==="Enter")go()}}
+
+/* Quest-Formular */
+let F;
+function openForm(){
+ const td=todayS();F={kind:"task",rec:"once",date:td,days:[pd(td).getDay()],touched:false,size:"mid",ap:false};
+ const seg=(g,arr)=>`<div class="seg">${arr.map(a=>`<button data-f="${g}" data-v="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+ const wdo=[1,2,3,4,5,6,0];
+ const s=sheet(`<h3>${t("newQ")}</h3>
+ ${seg("kind",[["task","⚔️ "+t("task")],["event","📌 "+t("event")]])}
+ <label>${t("title")}</label><input type="text" id="f-title" maxlength="80" placeholder="${esc(t("titlePh"))}" autocomplete="off">
+ <label>${t("repeat")}</label>${seg("rec",[["once",t("once")],["daily",t("daily")],["weekly",t("weekly")],["monthly",t("monthly")]])}
+ <div id="f-days"><label>${t("weekdays")}</label><div class="seg">${wdo.map(i=>`<button data-f="day" data-v="${i}">${WD[S.lang][i]}</button>`).join("")}</div></div>
+ <label id="f-dl">${t("date")}</label><input type="date" id="f-date" value="${td}">
+ <label>${t("time")}</label><input type="time" id="f-time">
+ <div id="f-size"><label>${t("size")}</label>${seg("size",[["easy",t("easy")],["mid",t("mid")],["boss",t("boss")]])}</div>
+ <label>${t("parent")}</label>${seg("ap",[["false",t("pNo")],["true",t("pYes")]])}
+ <p id="f-ph" class="warn" hidden>${t("pinHint")}</p>
+ <div class="btns"><button class="btn gh" data-a="close">${t("cancel")}</button><button class="btn" data-a="fsave">${t("save")}</button></div>`);
+ fsync()}
+function fsync(){const s=$(".sheet");if(!s||!F||!$("#f-days"))return;
+ s.querySelectorAll("[data-f]").forEach(b=>{const g=b.dataset.f,v=b.dataset.v;b.classList.toggle("on",g==="day"?F.days.includes(+v):String(F[g])===v)});
+ $("#f-days").hidden=F.rec!=="weekly";$("#f-size").hidden=F.kind!=="task";$("#f-ph").hidden=!(F.ap&&!S.pin);$("#f-dl").textContent=t(F.rec==="once"?"date":"startDate")}
+function fclick(b){const g=b.dataset.f,v=b.dataset.v;
+ if(g==="day"){const n=+v;F.touched=true;const i=F.days.indexOf(n);if(i>=0)F.days.splice(i,1);else F.days.push(n)}
+ else{F[g]=v==="true"?true:v==="false"?false:v;if(g==="rec"&&v==="weekly"&&!F.touched)F.days=[pd(F.date).getDay()]}
+ fsync()}
+function fsave(){
+ const title=($("#f-title").value||"").trim();
+ if(!title){toast(t("titleNeed"));$("#f-title").focus();return}
+ const date=$("#f-date").value||todayS();
+ const xp=F.kind==="event"?10:({easy:10,mid:20,boss:40})[F.size];
+ let days=F.days.slice().sort();if(F.rec==="weekly"&&!days.length)days=[pd(date).getDay()];
+ S.items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:title,kind:F.kind,rec:F.rec,date,days:F.rec==="weekly"?days:[],dom:pd(date).getDate(),time:$("#f-time").value||"",xp,ap:F.ap});
+ save();sfx.save();closeSheet();render()}
+
+/* Profil */
+let P;
+function procPhoto(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const s=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,160,160);cb(c.toDataURL("image/jpeg",.8))};im.src=r.result};r.readAsDataURL(file)}
+const BGS=["","#19e3ff","#ff3df2","#5cd13a","#ffe14d","#7c4dff","#ff8a3d","#ff4d6d","#2b2550"];
+const ACC=["","👑","🎩","🎧","🕶️","🧢","⭐","🎀"];
+const avHtml=(photo,use,skin,acc)=>((use&&photo)?`<img src="${esc(photo)}" alt="">`:skin)+(acc&&ACC.includes(acc)?`<span class="acc">${acc}</span>`:"");
+const avBg=bg=>/^#[0-9a-f]{6}$/i.test(bg||"")?` style="background:${bg}"`:"";
+function openProfile(){P={name:S.name,photo:S.photo,usePhoto:S.usePhoto,skin:S.skin,bg:S.bg||"",acc:S.acc||""};
+ sheet(`<h3>${t("charEdit")}</h3><div class="pv"><div class="av" id="pv"${avBg(P.bg)}>${avHtml(P.photo,P.usePhoto,P.skin,P.acc)}</div></div>
+ <label>${t("pName")}</label><input type="text" id="pname" maxlength="20" value="${esc(P.name)}" autocomplete="off">
+ <label>${t("charSkin")}</label><div class="chips">${S.owned.map(k=>`<button data-a="pskin" data-v="${k}" class="${!(P.usePhoto&&P.photo)&&P.skin===k?"on":""}">${k}</button>`).join("")}</div>
+ <input type="file" id="pfile" accept="image/*" hidden>
+ <div class="btns"><button class="btn gh" data-a="pfile">📷 ${t("pickPhoto")}</button></div>
+ <div class="btns"><button class="btn gh" data-a="puse"${P.photo?"":" disabled"}>${t("usePhoto")}</button><button class="btn gh" data-a="prm"${P.photo?"":" disabled"}>${t("rmPhoto")}</button></div>
+ <label>${t("charBg")}</label><div class="chips">${BGS.map(c=>`<button class="sw${P.bg===c?" on":""}" data-a="pbg" data-v="${c}"${c?` style="background:${c}"`:""}>${c?"":"∅"}</button>`).join("")}</div>
+ <label>${t("charAcc")}</label><div class="chips">${ACC.map(c=>`<button data-a="pacc" data-v="${c}" class="${P.acc===c?"on":""}">${c||"∅"}</button>`).join("")}</div>
+ <div class="btns"><button class="btn gh" data-a="close">${t("cancel")}</button><button class="btn" data-a="psave">${t("save")}</button></div>`)}
+function profSync(){const pv=$("#pv");if(!pv||!P)return;pv.innerHTML=avHtml(P.photo,P.usePhoto,P.skin,P.acc);pv.style.background=/^#[0-9a-f]{6}$/i.test(P.bg)?P.bg:"";
+ const own=!!(P.usePhoto&&P.photo);
+ document.querySelectorAll("[data-a=pskin]").forEach(b=>b.classList.toggle("on",!own&&P.skin===b.dataset.v));
+ document.querySelectorAll("[data-a=pbg]").forEach(b=>b.classList.toggle("on",P.bg===b.dataset.v));
+ document.querySelectorAll("[data-a=pacc]").forEach(b=>b.classList.toggle("on",P.acc===b.dataset.v));
+ document.querySelectorAll("[data-a=puse],[data-a=prm]").forEach(b=>{b.disabled=!P.photo})}
+function openSettings(){
+ sheet(`<h3>⚙️ ${t("settings")}</h3><label>${t("aLang")}</label><div class="seg">${LANGS.map(l=>`<button data-a="setlang" data-v="${l[0]}" class="${l[0]===S.lang?"on":""}">${l[1]}</button>`).join("")}</div>
+ <label>${t("sndT")}</label><div class="seg"><button data-a="setsnd" data-v="1" class="${S.sound?"on":""}">🔊 ${t("sndOn")}</button><button data-a="setsnd" data-v="0" class="${S.sound?"":"on"}">🔇 ${t("sndOff")}</button></div>
+ <div class="btns"><button class="btn" data-a="close">${t("close")}</button></div>`)}
+
+/* Witz */
+function openJoke(first){
+ const td=todayS(),L=JOKES[S.lang]||JOKES.de,j=L[(dayNum(td)+S.tipN*0)%L.length];
+ const s=sheet(`<div class="joke"><h3>${t(first?"jokeX":"jokeT")}</h3><q>${esc(j[0])}</q><div id="jp"></div><div class="btns"><button class="btn gh" data-a="close">${t("close")}</button><button class="btn" id="jbtn">${t("punch")}</button></div></div>`);
+ if(first&&!S.jokeOpen[td]){S.jokeOpen[td]=1;save();sfx.level();confetti(40)}
+ s.querySelector("#jbtn").onclick=function(){s.querySelector("#jp").innerHTML=`<div class="pl">${esc(j[1])}</div>`;sfx.drum();this.hidden=true}}
+
+/* ===== Rendering ===== */
+let tab="today";
+function avatar(){return avHtml(S.photo,S.usePhoto,S.skin,S.acc)}
+function hud(){const xp=S.xp%100;
+ return `<header class="hud"><div class="top"><div class="logo">${appName()}</div>
+ <button class="icobtn" data-a="settings" aria-label="${esc(t("settings"))}">⚙️</button></div>
+ <div class="me"><button class="av" data-a="profile"${avBg(S.bg)} aria-label="${esc(t("aAv"))}">${avatar()}</button>
+ <div class="mi"><div class="lv">${t("lvl",lvl())}</div><div class="bar" id="xpbar"><div class="fill" style="width:${xp}%"></div></div>
+ <div class="stats"><span>🪙 ${S.coins}</span><span>🔥 ${t("days",streak())}</span><span>✨ ${xp} XP</span></div></div></div></header><div class="split"></div>`}
+const recLabel=it=>t(it.rec);
+function row(it,d,confirmBtn){
+ const dn=isDone(it,d),pe=isPend(it,d);
+ const meta=[it.kind==="task"?"⚔️":"📌"];
+ if(it.time)meta.push(esc(it.time));
+ if(it.rec!=="once")meta.push(recLabel(it));
+ if(it.ap)meta.push("👪");
+ meta.push("+"+it.xp+" XP");
+ let mt=meta.join(" · ");if(pe)mt+=" · ⏳ "+t("pendTxt");
+ return `<div class="row ${dn?"done":pe?"pend":""}"><button class="chk" data-a="chk" data-id="${it.id}" data-d="${d}" aria-label="${esc(t("aChk"))}">${dn?"✓":pe?"⏳":""}</button>
+ <div class="rt"><div class="tt">${esc(it.t)}</div><div class="mt">${mt}</div></div>
+ ${(pe&&confirmBtn)?`<button class="btn sm" data-a="confirm" data-id="${it.id}" data-d="${d}">${t("confirm")}</button>`:""}</div>`}
+function tipCard(td){
+ const L=TIPS[S.lang]||TIPS.de,i=(dayNum(td)+S.tipN)%L.length,tp=L[i],seen=S.tipSeen[td];
+ return `<div class="card"><h3>${t("tip")}</h3><div class="tipc"><div class="e">${TE[i]}</div><div><b>${esc(tp[0])}</b><span>${esc(tp[1])}</span></div></div>
+ <div class="btns"><button class="btn gh sm" data-a="tipnext">${t("tipMore")}</button><button class="btn sm" data-a="tipread"${seen?" disabled":""}>${seen?t("tipDone"):t("tipRead")}</button></div></div>`}
+function jokeCard(td){const n=3-(S.act[td]||0);
+ return `<div class="card"><h3>${t("jokeT")}</h3>${n>0?`<p>${t("jokeLock",n)}</p>`:`<button class="btn sm" data-a="joke">😂 ${t("punch2")}</button>`}</div>`}
+function viewToday(){
+ const td=todayS(),list=dueList(td),dn=list.filter(i=>isDone(i,td)).length;
+ let h=S.name?`<div class="hello">${t("hello",esc(S.name))}</div>`:`<div style="margin-top:12px"><button class="btn sm" data-a="profile">${t("setProfile")}</button></div>`;
+ h+=`<h2>${fmtDate(td)}</h2>`+tipCard(td)+jokeCard(td);
+ const od=S.items.filter(i=>i.kind==="task"&&i.rec==="once"&&i.date<td&&!i.doneOn&&!(i.pendOn&&i.pendOn<td));
+ const wl=waitingList();
+ if(list.length){
+  h+=`<h3 style="margin-top:18px">${dn===list.length?t("allDone"):t("dayQuest",dn,list.length)}</h3><div class="bar big pgbar"><div class="fill" style="width:${Math.round(dn/list.length*100)}%"></div></div>`;
+  h+=list.map(i=>row(i,td,true)).join("")}
+ else if(!od.length&&!wl.length)h+=`<div class="card"><p>${t("emptyDay")}</p></div>`;
+ if(od.length)h+=`<h2>${t("overdue")}</h2>`+od.map(i=>row(i,td,true)).join("");
+ if(wl.length)h+=`<h2>${t("waiting")}</h2>`+wl.map(w=>`<div class="mt" style="margin-top:8px">${fmtDate(w.d)}</div>`+row(w.it,w.d,true)).join("");
+ return h}
+function viewPlan(){
+ const td=todayS();let h=`<h2>${t("next7")}</h2>`;
+ for(let i=0;i<7;i++){const d=addD(td,i),l=dueList(d);
+  h+=`<div class="card"><div class="dh">${fmtDate(d)}</div>${l.length?l.map(it=>`<div class="mini ${isDone(it,d)?"d":""}"><span>${it.kind==="task"?"⚔️":"📌"}</span><span class="tm">${esc(it.time||"")}</span><span>${esc(it.t)}</span></div>`).join(""):`<div class="free">${t("free")}</div>`}</div>`}
+ h+=`<h2>${t("allQ")}</h2>`;
+ let any=false;
+ ["once","daily","weekly","monthly"].forEach(rec=>{
+  const l=S.items.filter(i=>i.rec===rec&&!(rec==="once"&&i.doneOn));if(!l.length)return;any=true;
+  h+=`<h3 style="margin-top:14px;color:var(--cy)">${t(rec)}</h3>`+l.map(it=>{
+   const m=[it.kind==="task"?"⚔️":"📌"];
+   if(rec==="once")m.push(fmtDate(it.date));
+   if(rec==="weekly")m.push((it.days||[]).slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>WD[S.lang][x]).join(" "));
+   if(rec==="monthly")m.push(it.dom+".");
+   if(it.time)m.push(esc(it.time));m.push("+"+it.xp+" XP");
+   return `<div class="row"><div class="rt"><div class="tt">${esc(it.t)}</div><div class="mt">${m.join(" · ")}</div></div><div class="sm2"><button class="ib${it.ap?"":" off"}" data-a="ap" data-id="${it.id}" aria-label="${esc(t("aPin"))}">👪</button><button class="ib" data-a="del" data-id="${it.id}" aria-label="${esc(t("del"))}">🗑️</button></div></div>`}).join("")});
+ if(!any)h+=`<div class="card"><p>${t("emptyDay")}</p></div>`;
+ return h}
+function viewAcct(){
+ const xp=S.xp%100;
+ let h=`<div class="card charc"><div class="av big"${avBg(S.bg)}>${avatar()}</div><div class="cn">${esc(S.name||USER||"")}${ADMIN?" 👑":""}</div><div class="mt">@${esc(USER||"")} · ${t(ROLE==="child"?"roleChild":"roleAdult")}${ADMIN?" · Admin":""}</div>
+ <div class="lv" style="margin:12px 0 6px">${t("lvl",lvl())}</div><div class="bar"><div class="fill" style="width:${xp}%"></div></div>
+ <div class="stats" style="justify-content:center"><span>🪙 ${S.coins}</span><span>🔥 ${t("days",streak())}</span><span>🏆 ${t("days",S.best)}</span><span>🏅 ${S.badges.length}</span></div>
+ <div class="btns"><button class="btn" data-a="profile">${t("charEdit")}</button></div></div>
+ <div class="card"><h3>${t("nav_acct")}</h3><div class="btns" style="margin-top:0"><button class="btn gh" data-a="pwopen">${t("pwChange")}</button></div></div>`;
+ if(ROLE==="adult")h+=famBlock();
+ if(ADMIN)h+=admBlock();
+ h+=`<div class="btns"><button class="btn gh" data-a="logout">${t("logout")}</button></div>`;
+ return h}
+function viewLoot(){
+ const s=streak();
+ let h=`<h2>${t("badges")}</h2><div class="card"><div class="grid">${BD.map(b=>{const got=S.badges.includes(b[0]);return `<div class="cell${got?"":" lock"}"><div class="e">${b[1]}</div><div>${t(b[2])}</div><div>${t("days",b[0])}</div></div>`}).join("")}</div></div>`;
+ h+=`<h2>${t("skins")}</h2><div class="card"><div class="grid">${SK.map(k=>{const own=S.owned.includes(k[0]),wear=!S.usePhoto&&S.skin===k[0];
+  return `<button class="cell${wear?" on":""}${(!own&&S.coins<k[1])?" dim":""}" data-a="skin" data-v="${k[0]}"><div class="e">${k[0]}</div><div>${own?(wear?t("worn"):t("wear")):"🪙 "+k[1]}</div></button>`}).join("")}</div></div>`;
+ h+=`<h2>${t("rewards")}</h2>`+S.rewards.map(r=>`<div class="row"><div class="rt"><div class="tt">${esc(rewName(r))}</div><div class="mt">🪙 ${r.c}</div></div><button class="btn sm" data-a="redeem" data-id="${r.id}"${S.coins<r.c?" disabled":""}>${t("redeem")}</button><button class="ib" data-a="rwdel" data-id="${r.id}" aria-label="${esc(t("del"))}">✕</button></div>`).join("");
+ h+=`<div class="card"><label style="margin-top:0">${t("rwName")}</label><input type="text" id="rwn" maxlength="40"><label>${t("rwPrice")}</label><input type="number" id="rwc" inputmode="numeric" min="1"><div class="btns"><button class="btn" data-a="rwadd">${t("add")}</button></div></div>`;
+ if(PP){h+=`<h2>${t("payT")}</h2><div class="card"><p>${t("payTxt")}</p><p class="warn">${t("payAsk")}</p>
+  <div class="pay"><a class="btn" href="${PP.replace(/\/$/,"")}/0.20EUR" target="_blank" rel="noopener">0,20 €</a><a class="btn" href="${PP.replace(/\/$/,"")}/0.60EUR" target="_blank" rel="noopener">0,60 €</a></div>
+  <label>${t("amount")}</label><input type="text" id="ppamt" inputmode="decimal" placeholder="${esc(t("amtPh"))}" autocomplete="off">
+  <div class="btns"><a class="btn" id="ppgo" href="${PP.replace(/\/$/,"")}" target="_blank" rel="noopener">${t("amtGo")}</a></div></div>`}
+ h+=`<h2>${t("parentArea")}</h2><div class="card"><label style="margin-top:0">${t("pinSetLbl")}</label>`;
+ if(S.pin)h+=`<p>✅ ${t("pinOn")}</p><div class="btns"><button class="btn gh" data-a="pindel">${t("pinDel")}</button></div>`;
+ else h+=`<input type="password" id="pinnew" inputmode="numeric" maxlength="4" autocomplete="off"><div class="btns"><button class="btn" data-a="pinset">${t("pinSet")}</button></div>`;
+ h+=`</div><div class="btns"><button class="btn gh" data-a="reset">${t("reset")}</button></div>`;
+ return h}
+function pwFields(){return `<label>${t("pwOld")}</label><input type="password" id="pwo" maxlength="100" autocomplete="current-password"><label>${t("pwNew")}</label><input type="password" id="pw1" maxlength="100" autocomplete="new-password"><label>${t("pwRep")}</label><input type="password" id="pw2" maxlength="100" autocomplete="new-password"><div class="err" id="pwerr"></div>`}
+function renderMust(){document.title=appName();document.documentElement.lang=S.lang;
+ $("#app").innerHTML=`<div style="padding-top:calc(24px + env(safe-area-inset-top))"><div class="top"><div class="logo" style="font-size:18px">${appName()}</div><button class="icobtn" data-a="settings" aria-label="${esc(t("settings"))}">⚙️</button></div><div class="split" style="margin:14px 0"></div><div class="card"><h3>${t("mustT")}</h3><p>${t("mustTxt")}</p>${pwFields()}<div class="btns"><button class="btn" data-a="pwgo">${t("save")}</button></div><div class="btns"><button class="btn gh" data-a="logout">${t("logout")}</button></div></div></div>`}
+async function doChangePw(btn){
+ const forced=MUST,o=$("#pwo").value,a=$("#pw1").value,b=$("#pw2").value,er=$("#pwerr");
+ if(a.length<8){er.textContent=t("errPass");return}
+ if(a!==b){er.textContent=t("pwMismatch");return}
+ if(a===o){er.textContent=t("pwSame");return}
+ btn.disabled=true;er.textContent="";
+ try{const r=await api("/api/password","POST",{oldPassword:o,newPassword:a});
+  if(r.ok){MUST=false;sfx.ok();if(forced){dirty=true;render();push()}else{closeSheet();toast(t("admDone"))}return}
+  er.textContent=t(r.j.error==="oldbad"?"pwBad":r.j.error==="same"?"pwSame":r.j.error==="rate"?"errRate":"errPass")}
+ catch(e){er.textContent=t("errNet")}
+ btn.disabled=false}
+function pwSheet(n,ep){const s=sheet(`<h3>${t("admPw")}</h3><p>${esc(n)}</p><input type="password" id="admpwin" maxlength="100" autocomplete="new-password"><div class="err" id="admerr"></div><div class="btns"><button class="btn gh" data-a="close">${t("cancel")}</button><button class="btn" id="admok">OK</button></div>`);
+ s.querySelector("#admok").onclick=async()=>{const v=s.querySelector("#admpwin").value;if(v.length<8){s.querySelector("#admerr").textContent=t("errPass");return}const r=await api(ep,"POST",{username:n,password:v});if(r.ok){closeSheet();toast(t("admDone"))}else s.querySelector("#admerr").textContent=t("errNet")}}
+function childSheet(){const s=sheet(`<h3>${t("famAdd")}</h3><label>${t("user")}</label><input type="text" id="cn" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false"><label>${t("pass")}</label><input type="password" id="cp" maxlength="100" autocomplete="new-password"><div class="err" id="cerr"></div><div class="btns"><button class="btn gh" data-a="close">${t("cancel")}</button><button class="btn" id="cok">OK</button></div>`);
+ s.querySelector("#cok").onclick=async()=>{const u=s.querySelector("#cn").value.trim(),p=s.querySelector("#cp").value,er=s.querySelector("#cerr");
+  if(!/^[A-Za-z0-9][A-Za-z0-9_-]{2,19}$/.test(u)){er.textContent=t("errUser");return}
+  if(p.length<8){er.textContent=t("errPass");return}
+  const r=await api("/api/family/child","POST",{username:u,password:p});
+  if(r.ok){closeSheet();sfx.save();loadFamily()}else{const m={taken:"errTaken",user:"errUser",pass:"errPass",rate:"errRate",closed:"errClosed",limit:"famLimit"};er.textContent=t(m[r.j.error]||"errNet")}}}
+async function loadFamily(){try{const r=await api("/api/family");if(r.ok){FAM={children:r.j.children||[]};render()}}catch(e){}}
+function famBlock(){return `<h2>${t("famT")}</h2><div class="card"><h3>${t("famChildren")} (${FAM.children.length})</h3>`+(FAM.children.length?FAM.children.map(c=>`<div class="row"><div class="rt"><div class="tt">🧒 ${esc(c.name)}</div><div class="mt">${t("lvl",Math.floor(c.xp/100)+1)} · ${esc(String(c.created||"").slice(0,10))}</div></div><button class="ib" data-a="fampw" data-n="${esc(c.name)}" aria-label="${esc(t("admPw"))}">🔑</button><button class="ib" data-a="famdel" data-n="${esc(c.name)}" aria-label="${esc(t("del"))}">🗑️</button></div>`).join(""):`<p>${t("famNone")}</p>`)+`<div class="btns"><button class="btn" data-a="famadd">${t("famAdd")}</button></div></div>`}
+async function loadAdmin(){try{const r=await api("/api/admin/users");if(r.ok){ADM={users:r.j.users||[],allow:!!r.j.allowReg};render()}}catch(e){}}
+function admBlock(){return `<h2>${t("admT")}</h2><div class="card"><button class="btn sm" data-a="admreg">${t(ADM.allow?"admRegOn":"admRegOff")}</button><h3 style="margin-top:14px">${t("admUsers")} (${ADM.users.length})</h3>`+ADM.users.map(u=>`<div class="row"><div class="rt"><div class="tt">${u.role==="child"?"🧒":"🧑"} ${esc(u.name)}${u.admin?" 👑":""}</div><div class="mt">${t("lvl",Math.floor(u.xp/100)+1)} · ${esc(String(u.created||"").slice(0,10))}</div></div><button class="ib" data-a="admpw" data-n="${esc(u.name)}" aria-label="${esc(t("admPw"))}">🔑</button>${u.admin?"":`<button class="ib" data-a="admdel" data-n="${esc(u.name)}" aria-label="${esc(t("del"))}">🗑️</button>`}</div>`).join("")+`</div>`}
+function renderLogin(err){
+ document.title=appName();document.documentElement.lang=S.lang;
+ $("#app").innerHTML=`<div style="padding-top:calc(24px + env(safe-area-inset-top))"><div class="top"><div class="logo" style="font-size:18px">${appName()}</div>
+ <button class="icobtn" data-a="settings" aria-label="${esc(t("settings"))}">⚙️</button></div>
+ <div class="split" style="margin:14px 0"></div>
+ <div class="card"><h3>${t(LM==="login"?"loginT":"regT")}</h3>
+ ${LM==="register"?`<label>${t("roleLbl")}</label><div class="seg"><button data-a="rl" data-v="child" class="${RL==="child"?"on":""}">${t("roleChild")}</button><button data-a="rl" data-v="adult" class="${RL==="adult"?"on":""}">${t("roleAdult")}</button></div>`:""}<label>${t("user")}</label><input type="text" id="lu" maxlength="20" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+ <label>${t("pass")}</label><input type="password" id="lp" maxlength="100" autocomplete="${LM==="login"?"current-password":"new-password"}">
+ <div class="err" id="lerr">${err?esc(err):""}</div>
+ <div class="btns"><button class="btn" data-a="lgo">${t(LM==="login"?"loginBtn":"regBtn")}</button></div>
+ <div class="btns"><button class="btn gh" data-a="lswitch">${t(LM==="login"?"toReg":"toLogin")}</button></div></div></div>`}
+async function doAuth(btn){
+ const u=($("#lu").value||"").trim(),p=$("#lp").value||"",er=$("#lerr");
+ if(!/^[A-Za-z0-9][A-Za-z0-9_-]{2,19}$/.test(u)){er.textContent=t("errUser");return}
+ if(LM==="register"&&p.length<8){er.textContent=t("errPass");return}
+ if(!p){er.textContent=t("errLogin");return}
+ btn.disabled=true;er.textContent="";
+ try{const r=await api(LM==="login"?"/api/login":"/api/register","POST",{username:u,password:p,role:RL});
+  if(r.ok&&r.j.user){USER=r.j.user;ADMIN=!!r.j.admin;ROLE=r.j.role||"adult";MUST=!!r.j.mustChange;const lang=S.lang,st=r.j.state;S=Object.assign(def(),st||{});if(!st||!st.lang)S.lang=lang;tab="today";
+   if(LM==="register"||!st||!Object.keys(st).length){dirty=true;push()}render();sfx.ok();return}
+  const m={bad:"errLogin",taken:"errTaken",user:"errUser",pass:"errPass",rate:"errRate",closed:"errClosed"};
+  er.textContent=t(m[r.j.error]||"errNet")}
+ catch(e){er.textContent=t("errNet")}
+ btn.disabled=false}
+async function doLogout(){clearTimeout(saveT);await push();try{await api("/api/logout","POST",{})}catch(e){}
+ const l=S.lang;USER=null;ADMIN=false;ADM={users:[],allow:true};ROLE="adult";MUST=false;FAM={children:[]};S=def();S.lang=l;tab="today";LM="login";render()}
+function render(){
+ if(!USER){renderLogin();return}
+ if(MUST){renderMust();return}
+ const v=tab==="today"?viewToday():tab==="plan"?viewPlan():tab==="acct"?viewAcct():viewLoot();
+ const nb=(k,e,l)=>`<button class="${tab===k?"on":""}" data-a="tab" data-v="${k}"><span>${e}</span>${t(l)}</button>`;
+ $("#app").innerHTML=hud()+v+`<nav class="nav"><div>${nb("today","⚔️","nav_today")}${nb("plan","🗺️","nav_plan")}${nb("loot","🎁","nav_loot")}${nb("acct","👤","nav_acct")}</div></nav><button class="fab" data-a="add" aria-label="${esc(t("newQ"))}">+</button>`;
+ document.title=appName();document.documentElement.lang=S.lang}
+
+/* ===== Events ===== */
+function act(a,b){
+ const it=b.dataset.id?S.items.find(x=>x.id===b.dataset.id):null;
+ switch(a){
+ case "tab":tab=b.dataset.v;render();window.scrollTo(0,0);if(tab==="acct"&&ADMIN)loadAdmin();if(tab==="acct"&&ROLE==="adult")loadFamily();break;
+ case "add":openForm();break;
+ case "close":closeSheet();break;
+ case "snd":S.sound=!S.sound;save();render();sfx.ok();break;
+ case "chk":if(it)toggle(it,b.dataset.d,b);break;
+ case "confirm":if(it){const d=b.dataset.d;guard(()=>{setPend(it,d,false);setDone(it,d,true);award(it,d,b)})}break;
+ case "tipnext":S.tipN++;save();render();break;
+ case "tipread":{const td=todayS();if(!S.tipSeen[td]){S.tipSeen[td]=1;gain(5,b)}break}
+ case "joke":openJoke(false);break;
+ case "ap":if(it)guard(()=>{it.ap=!it.ap;
+   if(!it.ap){if(it.rec==="once"&&it.pendOn){const d=it.pendOn;setPend(it,d,false);setDone(it,d,true);award(it,d,null);return}
+    Object.keys(S.pend).forEach(d=>{const x=S.pend[d].indexOf(it.id);if(x>=0){S.pend[d].splice(x,1);setDone(it,d,true);S.xp+=it.xp;S.coins+=it.xp;S.act[d]=(S.act[d]||0)+1}});checkBadges()}
+   save();render()});break;
+ case "del":if(it)dbl(b,()=>{S.items=S.items.filter(x=>x.id!==it.id);save();sfx.undo();render()});break;
+ case "skin":{const k=SK.find(x=>x[0]===b.dataset.v);if(!k)break;
+   if(S.owned.includes(k[0])){S.skin=k[0];S.usePhoto=false;sfx.ok();save();render()}
+   else if(S.coins>=k[1]){S.coins-=k[1];S.owned.push(k[0]);S.skin=k[0];S.usePhoto=false;sfx.chest();confetti(40,["#ffe14d","#ffb300","#fff2a8"]);toast(t("skinBought"));save();render()}
+   else{toast(t("tooLittle"));sfx.undo()}break}
+ case "redeem":{const r=S.rewards.find(x=>x.id===b.dataset.id);if(r&&S.coins>=r.c){S.coins-=r.c;sfx.chest();confetti(45);toast(t("redeemed",rewName(r)));save();render()}break}
+ case "rwadd":{const n=($("#rwn").value||"").trim(),c=Math.floor(Number($("#rwc").value));
+   if(!n||!(c>0)){sfx.undo();break}
+   guard(()=>{S.rewards.push({id:"r"+Date.now().toString(36),n,c});save();sfx.save();render()});break}
+ case "rwdel":dbl(b,()=>guard(()=>{S.rewards=S.rewards.filter(x=>x.id!==b.dataset.id);save();render()}));break;
+ case "pinset":{const v=$("#pinnew").value;if(!/^\d{4}$/.test(v)){toast(t("pinNeed"));break}S.pin=v;save();sfx.save();render();break}
+ case "pindel":guard(()=>{S.pin="";save();render()});break;
+ case "reset":dbl(b,()=>guard(()=>{const l=S.lang;S=def();S.lang=l;save();tab="today";render()}));break;
+ case "profile":openProfile();break;
+ case "pfile":$("#pfile").click();break;
+ case "puse":if(P.photo){P.usePhoto=true;profSync()}break;
+ case "prm":P.photo="";P.usePhoto=false;profSync();break;
+ case "pskin":P.skin=b.dataset.v;P.usePhoto=false;profSync();break;
+ case "pbg":P.bg=b.dataset.v;profSync();break;
+ case "pacc":P.acc=b.dataset.v;profSync();break;
+ case "settings":openSettings();break;
+ case "setlang":S.lang=b.dataset.v;save();render();openSettings();break;
+ case "setsnd":S.sound=b.dataset.v==="1";save();sfx.ok();openSettings();break;
+ case "psave":S.name=P.name.trim().slice(0,20);S.photo=P.photo;S.usePhoto=!!(P.usePhoto&&P.photo);if(S.owned.includes(P.skin))S.skin=P.skin;S.bg=BGS.includes(P.bg)?P.bg:"";S.acc=ACC.includes(P.acc)?P.acc:"";save();sfx.save();closeSheet();render();break;
+ case "admreg":api("/api/admin/registration","POST",{allow:!ADM.allow}).then(()=>loadAdmin());break;
+ case "admdel":dbl(b,()=>api("/api/admin/delete","POST",{username:b.dataset.n}).then(()=>loadAdmin()));break;
+ case "admpw":pwSheet(b.dataset.n,"/api/admin/password");break;
+ case "fampw":pwSheet(b.dataset.n,"/api/family/password");break;
+ case "famdel":dbl(b,()=>api("/api/family/delete","POST",{username:b.dataset.n}).then(()=>loadFamily()));break;
+ case "famadd":childSheet();break;
+ case "rl":RL=b.dataset.v;document.querySelectorAll("[data-a=rl]").forEach(x=>x.classList.toggle("on",x.dataset.v===RL));break;
+ case "pwgo":doChangePw(b);break;
+ case "pwopen":sheet(`<h3>${t("pwChange")}</h3>${pwFields()}<div class="btns"><button class="btn gh" data-a="close">${t("cancel")}</button><button class="btn" data-a="pwgo">${t("save")}</button></div>`);break;
+ case "lgo":doAuth(b);break;
+ case "lswitch":LM=LM==="login"?"register":"login";renderLogin();break;
+ case "logout":doLogout();break;
+ case "fsave":fsave();break}}
+document.addEventListener("click",e=>{
+ const g=e.target.closest("#ppgo");
+ if(g){const v=parseFloat(String($("#ppamt").value||"").replace(",","."));if(!(v>0)||v>10000){e.preventDefault();toast(t("amtNeed"));return}g.href=PP.replace(/\/$/,"")+"/"+v.toFixed(2)+"EUR";return}
+ const f=e.target.closest("[data-f]");if(f){fclick(f);return}
+ const b=e.target.closest("[data-a]");if(b)act(b.dataset.a,b)});
+document.addEventListener("input",e=>{
+ if(e.target.id==="pname"&&P)P.name=e.target.value;
+ if(e.target.id==="f-date"&&F){F.date=e.target.value||todayS();if(F.rec==="weekly"&&!F.touched){F.days=[pd(F.date).getDay()];fsync()}}});
+document.addEventListener("change",e=>{
+ if(e.target.id==="lang"){S.lang=e.target.value;save();render()}
+ if(e.target.id==="pfile"&&P&&e.target.files[0]){procPhoto(e.target.files[0],u=>{P.photo=u;P.usePhoto=true;profSync()})}});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="lp"){const b=$("[data-a=lgo]");if(b&&!b.disabled)b.click()}});
+window.addEventListener("pagehide",()=>{clearTimeout(saveT);push(true)});
+document.addEventListener("visibilitychange",async()=>{
+ if(document.visibilityState!=="visible"||!USER||MUST||dirty||document.querySelector(".sbg"))return;
+ try{const r=await api("/api/me");if(r.ok&&r.j.user&&r.j.state&&!dirty&&!document.querySelector(".sbg")){S=Object.assign(def(),r.j.state);render()}else if(r.ok&&!r.j.user){USER=null;render()}}catch(e){}});
+load();
+(async()=>{try{const r=await api("/api/me");if(r.ok&&r.j.user){USER=r.j.user;ADMIN=!!r.j.admin;ROLE=r.j.role||"adult";MUST=!!r.j.mustChange;const lang=S.lang;S=Object.assign(def(),r.j.state||{});if(!r.j.state||!r.j.state.lang)S.lang=lang}}catch(e){}render()})();
+</script>
+</body>
+</html>

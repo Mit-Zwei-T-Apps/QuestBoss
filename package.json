@@ -1,0 +1,17 @@
+{
+  "name": "questboss",
+  "version": "1.0.0",
+  "description": "QuestBoss (TagesBoss): game-style task planner with accounts, no dependencies",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mit-Zwei-T-Apps/QuestBoss.git"
+  }
+}

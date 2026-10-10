@@ -1,0 +1,114 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/Mit-Zwei-T-Apps/QuestBoss/main/egg/egg-questboss.json"
+    },
+    "exported_at": "2026-10-10T16:08:40+00:00",
+    "name": "QuestBoss (TagesBoss)",
+    "author": "matteomitzweit@proton.me",
+    "description": "Mobile, game-style task and appointment planner web app (levels, XP, streaks, parent approval) with user accounts (child/adult), a family area and a default admin account that must change its password on first login. Standalone Node.js server without dependencies. The app is downloaded from GitHub Releases on install; data is stored in data/db.json.",
+    "features": null,
+    "docker_images": {
+        "Node.js 22": "ghcr.io/parkervcp/yolks:nodejs_22",
+        "Node.js 20": "ghcr.io/parkervcp/yolks:nodejs_20",
+        "Node.js 18": "ghcr.io/parkervcp/yolks:nodejs_18"
+    },
+    "file_denylist": [],
+    "startup": "node server.js",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": \"QuestBoss listening\"}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/ash\n# QuestBoss installation: downloads the release archive from GitHub Releases.\n# Program files are overwritten, data/ is kept.\nset -eu\nDIR=\"${SERVER_DIR:-/mnt/server}\"\nREPO=\"${GITHUB_REPO:-}\"\nTAG=\"${RELEASE_TAG:-latest}\"\nBASE=\"${GITHUB_BASE:-https://github.com}\"\nfail() { echo \"ERROR: $*\" >&2; exit 1; }\necho \"$REPO\" | grep -Eq '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$' || fail \"GITHUB_REPO must look like owner/repo (got: '$REPO')\"\necho \"$TAG\" | grep -Eq '^[A-Za-z0-9._-]+$' || fail \"RELEASE_TAG is invalid (got: '$TAG')\"\nif [ \"$TAG\" = \"latest\" ]; then URL=\"$BASE/$REPO/releases/latest/download\"; else URL=\"$BASE/$REPO/releases/download/$TAG\"; fi\ncommand -v curl >/dev/null 2>&1 || apk add --no-cache curl >/dev/null\nTMP=\"$(mktemp -d)\"\ntrap 'rm -rf \"$TMP\"' EXIT\necho \"Downloading $URL/questboss.tar.gz\"\ncurl -fsSL --retry 3 -o \"$TMP/questboss.tar.gz\" \"$URL/questboss.tar.gz\" || fail \"download failed (does the release exist and contain questboss.tar.gz?)\"\nif curl -fsSL -o \"$TMP/questboss.tar.gz.sha256\" \"$URL/questboss.tar.gz.sha256\"; then\n  (cd \"$TMP\" && sha256sum -c questboss.tar.gz.sha256) || fail \"checksum mismatch\"\nelse\n  echo \"WARNING: no checksum file in this release, skipping verification\"\nfi\ntar tzf \"$TMP/questboss.tar.gz\" | grep -Eq '(^/|(^|/)\\.\\.(/|$))' && fail \"archive contains unsafe paths\"\ntar tvzf \"$TMP/questboss.tar.gz\" | grep -Eq '^[lh]' && fail \"archive contains links\"\nmkdir -p \"$DIR/data\" \"$DIR/public\"\ntar xzf \"$TMP/questboss.tar.gz\" -C \"$DIR\"\nif [ ! -f \"$DIR/server.js\" ] || [ ! -f \"$DIR/public/index.html\" ]; then fail \"archive is missing server.js or public/index.html\"; fi\necho \"QuestBoss installed from $REPO ($TAG).\"\n",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "GitHub repository",
+            "description": "Where the app is downloaded from, as owner/repo. Only change this if you want to use a fork.",
+            "env_variable": "GITHUB_REPO",
+            "default_value": "Mit-Zwei-T-Apps/QuestBoss",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100|regex:/^[A-Za-z0-9_.-]+\\/[A-Za-z0-9_.-]+$/",
+            "field_type": "text"
+        },
+        {
+            "name": "Release tag",
+            "description": "Which release to install: 'latest' or a specific tag such as v1.0.0. Applied on install/reinstall (your data is kept).",
+            "env_variable": "RELEASE_TAG",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64|regex:/^[A-Za-z0-9._-]+$/",
+            "field_type": "text"
+        },
+        {
+            "name": "Allow registration",
+            "description": "true = new accounts can be created, false = only existing accounts can log in. The admin can also change this later inside the app.",
+            "env_variable": "ALLOW_REGISTER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin username",
+            "description": "Name of the default admin account that is created on first start.",
+            "env_variable": "ADMIN_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:3|max:20|regex:/^[A-Za-z0-9][A-Za-z0-9_-]+$/",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin password",
+            "description": "Leave empty for a random password (shown in the console and in data/admin-initial-password.txt). If set (at least 8 characters) it is used as the start password. It must be changed on first login. Changing this value later resets the admin password.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:8|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "HTTPS cookies",
+            "description": "Set to true if the site is served over HTTPS (for example behind a reverse proxy).",
+            "env_variable": "COOKIE_SECURE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Trust reverse proxy",
+            "description": "Set to true if a reverse proxy sets X-Forwarded-For (used for the per-IP login limit).",
+            "env_variable": "TRUST_PROXY",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Maximum accounts",
+            "description": "Upper limit for registered accounts.",
+            "env_variable": "MAX_USERS",
+            "default_value": "1000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:100000",
+            "field_type": "text"
+        }
+    ]
+}
