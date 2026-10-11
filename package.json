@@ -1,6 +1,6 @@
 {
   "name": "questboss",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "QuestBoss (TagesBoss): game-style task planner with accounts, no dependencies",
   "main": "server.js",
   "scripts": {

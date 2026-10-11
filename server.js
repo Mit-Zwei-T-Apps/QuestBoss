@@ -283,6 +283,27 @@ function enforceState(u, st) {
       }
     }
   }
+  capRewards(u, f, st, old, out, asg);
+}
+function capRewards(u, f, st, old, out, asg) {
+  if (!f || (u.role || "adult") !== "child") return;
+  let gain = 0;
+  const prevItems = new Map(asArr(old.items).filter((i) => i && typeof i.id === "string").map((i) => [i.id, i]));
+  const od = old.done && typeof old.done === "object" ? old.done : {};
+  for (const a of asg) {
+    if (a.rec === "once") {
+      const c = out.find((i) => i.id === a.id), p = prevItems.get(a.id) || {};
+      if (c && c.doneOn && !p.doneOn) gain += Number(a.xp) || 0;
+    } else if (st.done && typeof st.done === "object") {
+      for (const d of Object.keys(st.done)) {
+        if (d === "__proto__" || !Array.isArray(st.done[d]) || !st.done[d].includes(a.id)) continue;
+        if (!(has(od, d) && Array.isArray(od[d]) && od[d].includes(a.id))) gain += Number(a.xp) || 0;
+      }
+    }
+  }
+  const ox = Math.max(0, Number(old.xp) || 0), oc = Math.max(0, Number(old.coins) || 0);
+  st.xp = Math.max(0, Math.min(Number(st.xp) || 0, ox + gain));
+  st.coins = Math.max(0, Math.min(Number(st.coins) || 0, oc + gain));
 }
 function pendingFor(u, approverKey) {
   const st = u.state || {}, out = [];
@@ -806,6 +827,35 @@ const server = http.createServer(async (req, res) => {
         }
         const f = has(db.families, inv.fid) ? db.families[inv.fid] : null;
         if (famOf(me) || !f || f.members.length >= FAM_MAX || !f.members.includes(inv.fromKey)) return sendJson(res, 409, { error: "gone" });
+        joinFamily(f, s.key);
+        me.invites = [];
+        persist();
+        return sendJson(res, 200, { ok: true });
+      }
+      const byLink = (tok) => {
+        const h = sha(String(tok || ""));
+        for (const fid of Object.keys(db.families)) {
+          const f = db.families[fid], l = f.link;
+          if (l && l.h === h && l.exp > Date.now() && f.members.includes(l.by) && has(db.users, l.by)) return f;
+        }
+        return null;
+      };
+      if (p === "/api/family/link" && req.method === "POST") {
+        const f = mine();
+        if (!f || !adult) return sendJson(res, 403, { error: "role" });
+        if (limited("link:" + s.key, 30, 60 * 60 * 1000)) return sendJson(res, 429, { error: "rate" });
+        const tok = crypto.randomBytes(18).toString("base64url");
+        f.link = { h: sha(tok), by: s.key, exp: Date.now() + 7 * 864e5 };
+        persist();
+        return sendJson(res, 200, { token: tok });
+      }
+      if ((p === "/api/family/joininfo" || p === "/api/family/join") && req.method === "POST") {
+        if (limited("join:" + s.key, 30, 60 * 60 * 1000)) return sendJson(res, 429, { error: "rate" });
+        const b = await readBody(req);
+        if (famOf(me)) return sendJson(res, 409, { error: "have" });
+        const f = byLink(b.token);
+        if (!f || f.members.length >= FAM_MAX) return sendJson(res, 404, { error: "gone" });
+        if (p.endsWith("joininfo")) return sendJson(res, 200, { from: db.users[f.link.by].name });
         joinFamily(f, s.key);
         me.invites = [];
         persist();
