@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": "https://raw.githubusercontent.com/Mit-Zwei-T-Apps/QuestBoss/main/egg/egg-questboss.json"
     },
-    "exported_at": "2026-10-10T16:08:40+00:00",
+    "exported_at": "2026-10-10T17:39:13+00:00",
     "name": "QuestBoss (TagesBoss)",
     "author": "matteomitzweit@proton.me",
     "description": "Mobile, game-style task and appointment planner web app (levels, XP, streaks, parent approval) with user accounts (child/adult), a family area and a default admin account that must change its password on first login. Standalone Node.js server without dependencies. The app is downloaded from GitHub Releases on install; data is stored in data/db.json.",
@@ -72,7 +72,7 @@
         },
         {
             "name": "Admin password",
-            "description": "Leave empty for a random password (shown in the console and in data/admin-initial-password.txt). If set (at least 8 characters) it is used as the start password. It must be changed on first login. Changing this value later resets the admin password.",
+            "description": "Leave empty for a random password (shown in the console and in data/admin-initial-password.txt). If set (at least 8 characters) it is the admin password and no change is forced on first login. Changing this value later resets the admin password.",
             "env_variable": "ADMIN_PASSWORD",
             "default_value": "",
             "user_viewable": true,

@@ -4,7 +4,11 @@ A game-style daily planner for kids and teens: quests, XP, levels, coins, streak
 
 - Zero dependencies, Node.js >= 18
 - Data in `data/db.json` (atomic writes), passwords hashed with scrypt, HttpOnly session cookie
-- Family: adults create child accounts, assign tasks to them (optionally with parent approval), confirm completed tasks and manage the children's rewards. Child accounts that belong to a family have no PIN; self-registered child accounts keep the PIN
+- Families: adults can create child accounts and invite existing accounts (the invited person must accept). Everyone in a family can assign tasks to each other (optionally needing the assigner's confirmation), has per-person rewards (adults create rewards for themselves and unlock them for individual children; children can only create rewards for others), a shared shopping list and a family scoreboard that adults can dispute for children. Login and registration are real forms, so password managers and browsers can save the credentials.
+- Plans: rotating family plans (for example Kitchen) where chores shift to the next person every week or every day; tasks can also be assigned to several people at once
+- Lists: personal or family shopping list and a wish list; family members can secretly reserve wishes (the wisher does not see reservations)
+- Suggestions: users can send improvement ideas from the settings menu; the admin sees them in the Account tab
+- Child accounts created by an adult have no PIN; self-registered child accounts keep the PIN
 - App languages: English (default), German, French, Italian, Spanish, Polish (switch via the gear menu)
 
 ## Install on Pterodactyl
@@ -14,7 +18,7 @@ A game-style daily planner for kids and teens: quests, XP, levels, coins, streak
    - `GITHUB_REPO` - `owner/repo` to download from (default: Mit-Zwei-T-Apps/QuestBoss)
    - `RELEASE_TAG` - `latest` or a tag such as `v1.0.0`
    - `ALLOW_REGISTER`, `ADMIN_USER`, `ADMIN_PASSWORD`, `COOKIE_SECURE`, `TRUST_PROXY`, `MAX_USERS`
-3. Start the server. On first start an `admin` account is created with a random password, printed in the console and stored in `data/admin-initial-password.txt`. Log in and you will be forced to set a new password (the file is then deleted).
+3. Start the server. On first start an `admin` account is created with a random password, printed in the console and stored in `data/admin-initial-password.txt`. Log in and you will be forced to set a new password (the file is then deleted). If you set `ADMIN_PASSWORD` yourself, no change is forced.
 4. Update: set `RELEASE_TAG` (or keep `latest`) and run **Reinstall**. The `data/` folder is kept.
 
 The installer verifies `questboss.tar.gz.sha256` and rejects unsafe archives.
@@ -32,7 +36,7 @@ The installer verifies `questboss.tar.gz.sha256` and rejects unsafe archives.
 | `DATA_DIR` | `./data` | Storage directory |
 | `ALLOW_REGISTER` | true | Allow self-registration |
 | `ADMIN_USER` | admin | Admin username |
-| `ADMIN_PASSWORD` | random | Initial admin password (re-applied only when the value changes) |
+| `ADMIN_PASSWORD` | random | Admin password. If set, no password change is forced on first login; if empty, a random one is generated and must be changed on first login. Re-applied only when the value changes |
 | `COOKIE_SECURE` | false | Set `true` behind HTTPS |
 | `TRUST_PROXY` | false | Set `true` to use `X-Forwarded-For` for rate limiting |
 | `MAX_USERS` | 1000 | User limit |
