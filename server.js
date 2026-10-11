@@ -841,8 +841,8 @@ const server = http.createServer(async (req, res) => {
         return null;
       };
       if (p === "/api/family/link" && req.method === "POST") {
-        const f = mine();
-        if (!f || !adult) return sendJson(res, 403, { error: "role" });
+        if (!adult) return sendJson(res, 403, { error: "role" });
+        const f = mine() || ensureFamily(s.key);
         if (limited("link:" + s.key, 30, 60 * 60 * 1000)) return sendJson(res, 429, { error: "rate" });
         const tok = crypto.randomBytes(18).toString("base64url");
         f.link = { h: sha(tok), by: s.key, exp: Date.now() + 7 * 864e5 };
